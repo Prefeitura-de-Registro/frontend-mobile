@@ -33,7 +33,7 @@
           "imageWidth": 76
         }
       ],
-       [
+      [
         "expo-camera",
         {
           "cameraPermission": "Permitir que o app acesse sua câmera para anexar fotos de resolução do chamado."
