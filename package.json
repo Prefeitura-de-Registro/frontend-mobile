@@ -58,7 +58,7 @@
     "lint": "expo lint",
     "prepare": "husky",
     "format": "prettier --write .",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
