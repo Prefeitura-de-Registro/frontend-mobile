@@ -1,6 +1,5 @@
-import { View, Text } from 'react-native'
 import { useRouter } from 'expo-router'
-import { TouchableOpacity } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 
 export default function Login() {
   const router = useRouter()
