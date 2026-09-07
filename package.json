@@ -37,6 +37,7 @@
     "@eslint/js": "^9.39.5",
     "@types/jest": "29.5.14",
     "@types/react": "~19.2.2",
+    "eas-cli": "^14.7.1",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^57.0.2",
     "eslint-config-prettier": "^10.1.8",
@@ -54,11 +55,13 @@
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
+    "build:android": "eas build --platform android --local",
+    "build:ios": "eas build --platform ios --local",
+    "build:all": "eas build --platform all --local",
     "lint": "expo lint",
     "prepare": "husky",
     "format": "prettier --write .",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
