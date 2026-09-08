@@ -1,20 +1,40 @@
-import { theme } from '@/constants'
-import { useRouter } from 'expo-router'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { FooterLogo } from '@/components/organisms/FooterLogo';
+import { theme } from '@/constants';
+import { Link } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default function Index() {
-  const router = useRouter()
-
+export default function DevIndexScreen() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-      <Text style={{ fontSize: 20, fontFamily: theme.fonts.bold }}>Tela &quot;Listagem de chamados&quot; em construção</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Área de testes</Text>
 
-      <TouchableOpacity
-        onPress={() => router.push('/chamados/123')}
-        style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
-      >
-        <Text style={{ color: 'white', fontFamily: theme.fonts.bold }}>Ver chamado de exemplo</Text>
-      </TouchableOpacity>
+      <Link href="/dev/components-showcase" style={styles.link}>
+        Átomos (components-showcase)
+      </Link>
+      <Link href="/dev/organisms-showcase" style={styles.link}>
+        Moléculas + Organismos (organisms-showcase)
+      </Link>
+
+      <FooterLogo />
     </View>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    paddingTop: 80,
+    gap: 20,
+  },
+  title: {
+    fontFamily: theme.fonts.bold,
+    fontSize: 22,
+  },
+  link: {
+    fontFamily: theme.fonts.medium,
+    fontSize: 16,
+    color: theme.colors.primary,
+    textDecorationLine: 'underline',
+  },
+});
