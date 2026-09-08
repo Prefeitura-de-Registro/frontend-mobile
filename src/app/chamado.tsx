@@ -2,6 +2,7 @@ import { SearchInput } from '@/components/atoms/SearchInput';
 import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { ChamadosList } from '@/components/organisms/ChamadosList';
+import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { theme } from '@/constants';
 import { mockChamados } from '@/data/mockChamados';
@@ -88,7 +89,20 @@ export default function ChamadosScreen() {
         <FooterLogo />
       </View>
 
-     
+       {/* Modal de Filtros Avançados */}
+        <FiltroBottomSheet
+          visible={filtroVisible}
+          prioridadesSelecionadas={prioridades}
+          tiposSelecionados={tipos}
+          onTogglePrioridade={togglePrioridade}
+          onToggleTipo={toggleTipo}
+          onLimpar={() => {
+            setPrioridades([]);
+            setTipos([]);
+          }}
+          onAplicar={() => setFiltroVisible(false)}
+          onClose={() => setFiltroVisible(false)}
+        />
     </View>
   );
 }
