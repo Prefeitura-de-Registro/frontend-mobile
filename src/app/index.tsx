@@ -11,11 +11,21 @@ export default function DevIndexScreen() {
       <Link href="/dev/components-showcase" style={styles.link}>
         Átomos (components-showcase)
       </Link>
+      
       <Link href="/dev/organisms-showcase" style={styles.link}>
         Moléculas + Organismos (organisms-showcase)
       </Link>
+      
       <Link href="/detalhes_chamado" style={styles.link}>
         detalhes_chamado
+      </Link>
+      
+      <Link href="/chamado" style={styles.link}>
+        Chamados 
+      </Link>
+
+      <Link href="/home" style={styles.link}>
+        Voltar para Home
       </Link>
 
       <FooterLogo />
