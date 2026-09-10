@@ -13,11 +13,7 @@ export function FilterChip({ label, color, selected, onToggle }: FilterChipProps
     <TouchableOpacity
       onPress={onToggle}
       activeOpacity={0.7}
-      style={[
-        styles.chip,
-        { borderColor: color },
-        selected && { backgroundColor: color },
-      ]}
+      style={[styles.chip, { borderColor: color }, selected && { backgroundColor: color }]}
     >
       <Text style={[styles.label, { color: selected ? 'white' : color }]}>{label}</Text>
     </TouchableOpacity>

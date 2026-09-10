@@ -1,10 +1,5 @@
 import { theme } from '@/constants';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface PrimaryButtonProps {
   label: string;
@@ -21,11 +16,7 @@ export function PrimaryButton({ label, onPress, disabled, loading }: PrimaryButt
       activeOpacity={0.8}
       style={[styles.button, (disabled || loading) && styles.disabled]}
     >
-      {loading ? (
-        <ActivityIndicator color="white" />
-      ) : (
-        <Text style={styles.label}>{label}</Text>
-      )}
+      {loading ? <ActivityIndicator color="white" /> : <Text style={styles.label}>{label}</Text>}
     </TouchableOpacity>
   );
 }

@@ -8,7 +8,11 @@ interface SearchInputProps {
   placeholder?: string;
 }
 
-export function SearchInput({ value, onChangeText, placeholder = 'Buscar chamado' }: SearchInputProps) {
+export function SearchInput({
+  value,
+  onChangeText,
+  placeholder = 'Buscar chamado',
+}: SearchInputProps) {
   return (
     <View style={styles.container}>
       <TextInput
