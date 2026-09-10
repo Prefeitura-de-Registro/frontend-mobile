@@ -2,7 +2,7 @@ import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_700Bold,
-  useFonts
+  useFonts,
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -27,7 +27,5 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
-    <Stack screenOptions={{ headerShown: false }} />
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

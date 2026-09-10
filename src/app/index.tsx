@@ -14,6 +14,9 @@ export default function DevIndexScreen() {
       <Link href="/dev/organisms-showcase" style={styles.link}>
         Moléculas + Organismos (organisms-showcase)
       </Link>
+      <Link href="/detalhes_chamado" style={styles.link}>
+        detalhes_chamado
+      </Link>
 
       <FooterLogo />
     </View>
