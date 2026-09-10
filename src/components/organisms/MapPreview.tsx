@@ -8,8 +8,6 @@ interface MapPreviewProps {
   onVerMapaCompleto: () => void;
 }
 
-// Placeholder estático — trocar por react-native-maps (ou uma imagem de Static Maps)
-// quando a lib de mapa estiver configurada no projeto (precisa de API key no Android).
 export function MapPreview({ title = 'Mapa de ocorrências', onVerMapaCompleto }: MapPreviewProps) {
   return (
     <View style={styles.container}>

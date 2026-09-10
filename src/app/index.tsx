@@ -1,57 +1,101 @@
+import { HeaderBackground } from '@/components/molecules/HeaderBackground';
+import { HeaderGreetingContent } from '@/components/molecules/HeaderGreetingContent';
+import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
+import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
+import { MapPreview } from '@/components/organisms/MapPreview';
 import { theme } from '@/constants';
-import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { mockChamados } from '@/data/mockChamados';
+import { useRouter } from 'expo-router';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+// ajuste o caminho abaixo se o nome/local do arquivo for outro no seu projeto
 
-export default function DevIndexScreen() {
+
+export default function HomeOperadorScreen() {
+  const router = useRouter();
+
+  const abertos = mockChamados.filter((c) => c.status === 'aberto').length;
+  const emAndamento = mockChamados.filter((c) => c.status === 'em_atendimento').length;
+  const concluidos = mockChamados.filter((c) => c.status === 'concluido').length;
+  const urgentes = mockChamados.filter((c) => c.prioridade === 'urgente');
+
+  function irParaDetalhe(id: string) {
+    router.push(`/chamados/${id}`);
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Área de testes</Text>
+    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+      <HeaderBackground height={180}>
+        <HeaderGreetingContent
+          userName="Carlos"
+          role="Secretaria de Obras"
+          avatarUri="https://i.pravatar.cc/100"
+          onPressNotification={() => {
+            // TODO: navegar pra tela de notificações
+          }}
+        />
+      </HeaderBackground>
 
-      <Link href="/dev/components-showcase" style={styles.link}>
-        Átomos (components-showcase)
-      </Link>
-      
-      <Link href="/dev/organisms-showcase" style={styles.link}>
-        Moléculas + Organismos (organisms-showcase)
-      </Link>
-      
-      <Link href="/detalhes_chamado" style={styles.link}>
-        detalhes_chamado
-      </Link> 
-       
-      <Link href="/finalizar_atendimento" style={styles.link}>
-        finalizar atendimento
-      </Link>
-      
-      <Link href="/chamado" style={styles.link}>
-        Chamados 
-      </Link>
+      <View style={styles.content}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
+          <TouchableOpacity onPress={() => router.push('/chamados')}>
+            <Text style={styles.verTodos}>Ver todos</Text>
+          </TouchableOpacity>
+        </View>
 
-      <Link href="/home" style={styles.link}>
-        Voltar para Home
-      </Link>
+        <View style={styles.statsRow}>
+          <SummaryStatCard label="Abertos" value={abertos} color="#2ECC71" />
+          <SummaryStatCard label="Andamento" value={emAndamento} color={theme.colors.primary} />
+          <SummaryStatCard label="Concluídos" value={concluidos} color={theme.colors.danger} />
+        </View>
 
+        <Text style={styles.sectionTitle}>Urgentes</Text>
+        <ChamadosList chamados={urgentes} onSelectChamado={irParaDetalhe} scrollEnabled={false} />
+
+        <MapPreview
+          onVerMapaCompleto={() => {
+            // TODO: navegar pra tela de mapa completo
+          }}
+        />
+      </View>
       <FooterLogo />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    backgroundColor: 'white',
+  },
+  content: {
     padding: 20,
-    paddingTop: 80,
-    gap: 20,
+    gap: 16,
   },
-  title: {
-    fontFamily: theme.fonts.bold,
-    fontSize: 22,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  link: {
+  sectionTitle: {
     fontFamily: theme.fonts.medium,
     fontSize: 16,
+    color: '#222',
+  },
+  verTodos: {
+    fontFamily: theme.fonts.medium,
+    fontSize: 13,
     color: theme.colors.primary,
-    textDecorationLine: 'underline',
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    overflow: 'hidden',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
 });

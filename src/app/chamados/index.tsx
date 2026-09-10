@@ -1,136 +1,154 @@
-import { Avatar } from '@/components/atoms/Avatar';
-import { CheckboxItem } from '@/components/atoms/CheckboxItem';
-import { Divider } from '@/components/atoms/Divider';
-import { FilterChip } from '@/components/atoms/FilterChip';
-import { IconButton } from '@/components/atoms/IconButton';
-import { LinkText } from '@/components/atoms/LinkText';
-import { PrimaryButton } from '@/components/atoms/PrimaryButton';
-import { PriorityBadge } from '@/components/atoms/PriorityBadge';
 import { SearchInput } from '@/components/atoms/SearchInput';
-import { SecondaryButton } from '@/components/atoms/SecondaryButton';
-import { StatusBadge } from '@/components/atoms/StatusBadge';
+import { HeaderBackground } from '@/components/molecules/HeaderBackground';
+import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
+import { ChamadosList } from '@/components/organisms/ChamadosList';
+import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
+import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { theme } from '@/constants';
-import { PrioridadeChamado, StatusChamado } from '@/types/chamado';
-import { Bell } from 'lucide-react-native';
+import { mockChamados } from '@/data/mockChamados';
+import { PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { useRouter } from 'expo-router';
+import { SlidersHorizontal } from 'lucide-react-native';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const ALL_STATUS: StatusChamado[] = ['aberto', 'em_atendimento', 'concluido'];
-const ALL_PRIORITY: PrioridadeChamado[] = ['urgente', 'medio', 'normal'];
+export default function ChamadosScreen() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'Todos' | 'Abertos' | 'Em andamento' | 'Concluídos'>('Todos');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filtroVisible, setFiltroVisible] = useState(false);
+  const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
+  const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
 
-export default function ComponentsShowcaseScreen() {
-  const [search, setSearch] = useState('');
-  const [checked, setChecked] = useState(false);
-  const [selectedChip, setSelectedChip] = useState<PrioridadeChamado | null>('urgente');
+  function togglePrioridade(p: PrioridadeChamado) {
+    setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
+  }
+
+  function toggleTipo(t: TipoOcorrencia) {
+    setTipos((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+  }
+
+  // Filtragem dinâmica de chamados
+  const chamadosFiltrados = mockChamados.filter((c) => {
+    // Filtro por texto de busca
+    const matchSearch = c.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.includes(searchQuery);
+    
+    // Filtro pelas abas superiores
+    let matchTab = true;
+    if (activeTab === 'Abertos') matchTab = c.status === 'aberto';
+    if (activeTab === 'Em andamento') matchTab = c.status === 'em_atendimento';
+    if (activeTab === 'Concluídos') matchTab = c.status === 'concluido';
+
+    // Filtros do BottomSheet
+    const matchPrioridade = prioridades.length === 0 || prioridades.includes(c.prioridade);
+    const matchTipo = tipos.length === 0 || tipos.includes(c.tipo);
+
+    return matchSearch && matchTab && matchPrioridade && matchTipo;
+  });
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.pageTitle}>Vitrine de componentes</Text>
+    <View style={styles.container}>
+      {/* Cabeçalho com degradê e botão de voltar */}
+      <HeaderBackground height={130}>
+        <HeaderNavigationContent title="Chamados" onPressBack={() => router.back()} />
+      </HeaderBackground>
 
-      <Section title="StatusBadge">
-        <Row>
-          {ALL_STATUS.map((status) => (
-            <StatusBadge key={status} status={status} />
-          ))}
-        </Row>
-      </Section>
+      <View style={styles.content}>
+        {/* Abas de filtro superior e botão de abrir modal de filtros */}
+        <View style={styles.filterBarRow}>
+          <View style={styles.tabsRow}>
+            {(['Todos', 'Abertos', 'Em andamento', 'Concluídos'] as const).map((tab, index, arr) => (
+              <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} activeOpacity={0.7}>
+                <Text style={[styles.tabText, activeTab === tab && styles.tabActive]}>
+                  {tab} {index < arr.length - 1 && '| '}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <TouchableOpacity onPress={() => setFiltroVisible(true)} activeOpacity={0.7}>
+            <SlidersHorizontal size={20} color={theme.colors.primary} />
+          </TouchableOpacity>
+        </View>
 
-      <Section title="PriorityBadge">
-        <Row>
-          {ALL_PRIORITY.map((p) => (
-            <PriorityBadge key={p} prioridade={p} />
-          ))}
-        </Row>
-      </Section>
+        {/* Input de busca */}
+        <View style={styles.searchWrapper}>
+          <SearchInput value={searchQuery} onChangeText={setSearchQuery} />
+        </View>
 
-      <Section title="Botões">
-        <PrimaryButton label="Atender chamado" onPress={() => {}} />
-        <View style={{ height: 12 }} />
-        <PrimaryButton label="Carregando" onPress={() => {}} loading />
-        <View style={{ height: 12 }} />
-        <PrimaryButton label="Desabilitado" onPress={() => {}} disabled />
-        <View style={{ height: 12 }} />
-        <SecondaryButton label="Transferir para outro setor" onPress={() => {}} />
-      </Section>
+        {/* Lista de chamados */}
+        <View style={styles.listContainer}>
+          <ChamadosList 
+            chamados={chamadosFiltrados} 
+            onSelectChamado={(id) => router.push(`/detalhes_chamado?id=${id}`)} 
+          />
+        </View>
+      </View>
 
-      <Section title="IconButton + Avatar">
-        <Row>
-          <IconButton onPress={() => {}}>
-            <Bell size={20} color="white" />
-          </IconButton>
-          <Avatar uri="https://i.pravatar.cc/100" size={48} />
-        </Row>
-      </Section>
+      {/* Rodapé fixo na parte inferior */}
+      <View style={styles.footerContainer}>
+        <FooterLogo />
+      </View>
 
-      <Section title="SearchInput">
-        <SearchInput value={search} onChangeText={setSearch} />
-      </Section>
-
-      <Section title="FilterChip">
-        <Row>
-          {ALL_PRIORITY.map((p) => (
-            <FilterChip
-              key={p}
-              label={p}
-              color={p === 'urgente' ? '#E53935' : p === 'medio' ? '#F5A623' : '#7B61FF'}
-              selected={selectedChip === p}
-              onToggle={() => setSelectedChip(p === selectedChip ? null : p)}
-            />
-          ))}
-        </Row>
-      </Section>
-
-      <Section title="CheckboxItem">
-        <CheckboxItem label="Buraco" checked={checked} onToggle={() => setChecked(!checked)} />
-      </Section>
-
-      <Section title="LinkText">
-        <LinkText label="Ver mapa completo" onPress={() => {}} />
-      </Section>
-
-      <Section title="Divider">
-        <Divider />
-      </Section>
-    </ScrollView>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {children}
+       {/* Modal de Filtros Avançados */}
+        <FiltroBottomSheet
+          visible={filtroVisible}
+          prioridadesSelecionadas={prioridades}
+          tiposSelecionados={tipos}
+          onTogglePrioridade={togglePrioridade}
+          onToggleTipo={toggleTipo}
+          onLimpar={() => {
+            setPrioridades([]);
+            setTipos([]);
+          }}
+          onAplicar={() => setFiltroVisible(false)}
+          onClose={() => setFiltroVisible(false)}
+        />
     </View>
   );
 }
 
-function Row({ children }: { children: React.ReactNode }) {
-  return <View style={styles.row}>{children}</View>;
-}
-
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    gap: 24,
+    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
-  pageTitle: {
-    fontFamily: theme.fonts.bold,
-    fontSize: 22,
-    marginBottom: 8,
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
-  section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontFamily: theme.fonts.medium,
-    fontSize: 14,
-    color: '#888',
-    textTransform: 'uppercase',
-  },
-  row: {
+  filterBarRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 12,
+    marginBottom: 16,
+  },
+  tabsRow: {
+    flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 4,
+  },
+  tabText: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 13,
+    color: '#888',
+  },
+  tabActive: {
+    fontFamily: theme.fonts.bold,
+    color: theme.colors.primary,
+  },
+  searchWrapper: {
+    marginBottom: 16,
+  },
+  listContainer: {
+    flex: 1,
+    marginBottom: 12,
+  },
+  footerContainer: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
   },
 });
