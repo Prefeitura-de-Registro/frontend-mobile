@@ -18,6 +18,10 @@ export default function DevIndexScreen() {
         Chamados 
       </Link>
 
+      <Link href="/home" style={styles.link}>
+        Voltar para Home
+      </Link>
+
       <FooterLogo />
     </View>
   );
