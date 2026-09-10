@@ -2,29 +2,14 @@ import { Image, StyleSheet, View } from 'react-native';
 
 interface HeaderBackgroundProps {
   height?: number;
-  photoUri?: string; // foto de fundo, como no Figma (gradiente por cima de uma foto)
+  photoUri?: string;
   children: React.ReactNode;
 }
 
-export function HeaderBackground({ height, children }: HeaderBackgroundProps) {
+export function HeaderBackground({ height = 130, children }: HeaderBackgroundProps) {
   return (
     <View style={[styles.container, { height }]}>
-      <Image
-        source={require('@/assets/images/degrade-registro.png')}
-        style={StyleSheet.absoluteFill}
-        resizeMode="cover"
-      />
-
-      {/* <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <SvgLinearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#7FD1C3" stopOpacity={0.9} />
-            <Stop offset="100%" stopColor="#4A9FD8" stopOpacity={0.9} />
-          </SvgLinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#headerGradient)" />
-      </Svg> */}
-
+      <Image source={require('@/assets/images/degrade-registro.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
       <View style={styles.content}>{children}</View>
     </View>
   );
@@ -37,9 +22,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'flex-end',
-    paddingTop: 60,
+    justifyContent: 'center',
+    alignItems: 'flex-start', // Garante que começa alinhado à esquerda da tela
     paddingHorizontal: 20,
-    paddingBottom: 24,
   },
 });
