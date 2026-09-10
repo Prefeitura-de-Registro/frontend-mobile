@@ -7,7 +7,12 @@ interface IconButtonProps {
   size?: number;
 }
 
-export function IconButton({ onPress, children, backgroundColor = '#0E6E96', size = 40 }: IconButtonProps) {
+export function IconButton({
+  onPress,
+  children,
+  backgroundColor = '#0E6E96',
+  size = 40,
+}: IconButtonProps) {
   return (
     <TouchableOpacity
       onPress={onPress}

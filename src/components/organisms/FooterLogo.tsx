@@ -20,6 +20,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   logo: {
-    height: 32, 
-  }
+    height: 32,
+  },
 });

@@ -6,11 +6,15 @@ interface HeaderBackgroundProps {
   children: React.ReactNode;
 }
 
-export function HeaderBackground({ height = 100, children }: HeaderBackgroundProps) {
+export function HeaderBackground({ height, children }: HeaderBackgroundProps) {
   return (
     <View style={[styles.container, { height }]}>
-      <Image source={require('@/assets/images/degrade-registro.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
-    
+      <Image
+        source={require('@/assets/images/degrade-registro.png')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
+
       {/* <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
         <Defs>
           <SvgLinearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">

@@ -63,11 +63,7 @@ export function CardChamadoDetalhe({
           activeOpacity={0.7}
         >
           <Text style={styles.maisDetalhesLabel}>Mais detalhes</Text>
-          {expanded ? (
-            <ChevronUp size={16} color="#555" />
-          ) : (
-            <ChevronDown size={16} color="#555" />
-          )}
+          {expanded ? <ChevronUp size={16} color="#555" /> : <ChevronDown size={16} color="#555" />}
         </TouchableOpacity>
 
         {expanded && (
