@@ -18,6 +18,10 @@ export default function DevIndexScreen() {
       
       <Link href="/detalhes_chamado" style={styles.link}>
         detalhes_chamado
+      </Link> 
+       
+      <Link href="/finalizar_atendimento" style={styles.link}>
+        finalizar atendimento
       </Link>
       
       <Link href="/chamado" style={styles.link}>
