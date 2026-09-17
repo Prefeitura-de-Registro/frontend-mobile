@@ -5,19 +5,11 @@ import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { PhotoUploadBox } from '@/components/molecules/PhotoUploadBox';
 import { InfoRow } from '@/components/organisms/InfoRow';
-import { useRouter } from 'expo-router';
+import { mockChamados } from '@/data/mockChamados'; // Importa o mock oficial
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { styles } from './style';
-
-// Dados mockados do chamado (na versão real virão por rota/params ou API)
-const chamadoMock = {
-  titulo: 'Buraco',
-  codigo: '#2026-00001',
-  local: 'Rua das Flores, 220',
-};
-
-
 
 type Resultado = 'resolvido' | 'parcial' | 'nao_resolvido' | null;
 
@@ -29,18 +21,25 @@ const opcoesResultado: { label: string; value: Resultado }[] = [
 
 export default function FinalizarAtendimentoScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  const chamadoEncontrado = mockChamados.find((c) => c.id === id) || mockChamados[0];
+  
+  const chamadoMock = {
+    titulo: chamadoEncontrado.titulo,
+    codigo: `#${chamadoEncontrado.id}`,
+    local: chamadoEncontrado.endereco,
+  };
 
   const [resultado, setResultado] = useState<Resultado>(null);
   const [hasPhoto, setHasPhoto] = useState(false);
   const [observacoes, setObservacoes] = useState('');
 
   function handleAdicionarFoto() {
-    // Mock: em produção, abrir câmera/galeria (ex: expo-image-picker)
     setHasPhoto((prev) => !prev);
   }
 
   function handleFinalizar() {
-    // Mock: em produção, enviar para a API
     console.log({
       chamado: chamadoMock.codigo,
       resultado,
@@ -103,8 +102,6 @@ export default function FinalizarAtendimentoScreen() {
           <View style={styles.buttonWrapper}>
             <PrimaryButton label="Finalizar atendimento" onPress={handleFinalizar} />
           </View>
-
-          
         </View>
       </ScrollView>
     </ScrollView>

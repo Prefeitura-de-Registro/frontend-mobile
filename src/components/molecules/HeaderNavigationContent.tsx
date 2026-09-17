@@ -10,7 +10,7 @@ interface HeaderNavigationContentProps {
 export function HeaderNavigationContent({ title, onPressBack }: HeaderNavigationContentProps) {
   return (
     <View style={styles.row}>
-      <TouchableOpacity onPress={onPressBack} style={styles.backButton}>
+      <TouchableOpacity onPress={onPressBack} style={styles.backButton} activeOpacity={0.8}>
         <ChevronLeft size={22} color="white" />
       </TouchableOpacity>
       <Text style={styles.title}>{title}</Text>
@@ -21,8 +21,9 @@ export function HeaderNavigationContent({ title, onPressBack }: HeaderNavigation
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    alignItems: 'center', 
+    gap: 75,
+    paddingTop: 50
   },
   backButton: {
     width: 36,
@@ -36,5 +37,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bold,
     fontSize: 22,
     color: theme.colors.primary,
+    lineHeight: 26, 
+    textAlign: 'center',
   },
 });
