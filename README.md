@@ -1,56 +1,29 @@
-# Welcome to your Expo app 👋
+# Release 17/09 - Squad Mobile (Operador)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este documento contém as entregas da **Squad Mobile** referentes à release do dia **17 de setembro**, desenvolvidas para a disciplina de Laboratório de Práticas do curso de Desenvolvimento de Software Multiplataforma da FATEC Registro.
 
-## Get started
+## Resumo da Entrega
 
-1. Install dependencies
+Nesta release, focamos na implementação prática e na integração de ponta a ponta do aplicativo mobile voltado para o **Operador**, transpondo o design do Figma para o código real utilizando Expo Router, React Native e TypeScript.
 
-   ```bash
-   npm install
-   ```
+As principais entregas foram divididas em duas frentes:
 
-2. Start the app
+### 1. Arquitetura de Componentes e Design System
 
-   ```bash
-   npx expo start
-   ```
+* **Padronização Visual:** Implementação de componentes atômicos e moleculares (como botões, badges de status, chips de prioridade e caixas de busca) em perfeita conformidade com as diretrizes do Figma.
+* **Cabeçalhos e Rodapés Reutilizáveis:** Estruturação do `HeaderBackground` e do `FooterLogo` (com os brasões da Prefeitura de Registro e da Fatec), garantindo alinhamento visual e posicionamento fixo correto em todas as telas.
 
-In the output, you'll find options to open the app in a
+### 2. Fluxo Completo de Chamados do Operador
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* **Tela de Listagem (`/chamados`):**
+* Listagem dinâmica de ocorrências com suporte a abas de filtro (*Todos*, *Abertos*, *Em andamento*, *Concluídos*) e barra de busca integrada.
+* Inclusão de um modal de filtros avançados (`FiltroBottomSheet`) para filtragem por prioridade e tipo de ocorrência.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+* **Tela de Detalhes (`/detalhes_chamado`):**
+* Conexão via parâmetros de rota (`useLocalSearchParams`) para capturar o ID da ocorrência selecionada na lista.
+* Visualização detalhada das informações do chamado (endereço, descrição, fotos e SLA) e botões de ação para atendimento.
 
-When you're ready, run:
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+* **Tela de Finalização (`/finalizar_atendimento`):**
+* Recepção dos dados dinâmicos do chamado via rota, permitindo ao operador registrar o resultado do serviço, anexar comprovante fotográfico e preencher observações conclusivas.

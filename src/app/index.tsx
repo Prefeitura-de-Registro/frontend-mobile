@@ -1,98 +1,101 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { HeaderBackground } from '@/components/molecules/HeaderBackground';
+import { HeaderGreetingContent } from '@/components/molecules/HeaderGreetingContent';
+import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
+import { ChamadosList } from '@/components/organisms/ChamadosList';
+import { FooterLogo } from '@/components/organisms/FooterLogo';
+import { MapPreview } from '@/components/organisms/MapPreview';
+import { theme } from '@/constants';
+import { mockChamados } from '@/data/mockChamados';
+import { useRouter } from 'expo-router';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+// ajuste o caminho abaixo se o nome/local do arquivo for outro no seu projeto
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+export default function HomeOperadorScreen() {
+  const router = useRouter();
+
+  const abertos = mockChamados.filter((c) => c.status === 'aberto').length;
+  const emAndamento = mockChamados.filter((c) => c.status === 'em_atendimento').length;
+  const concluidos = mockChamados.filter((c) => c.status === 'concluido').length;
+  const urgentes = mockChamados.filter((c) => c.prioridade === 'urgente');
+
+  function irParaDetalhe(id: string) {
+    router.push(`/chamados/${id}`);
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+      <HeaderBackground height={180}>
+        <HeaderGreetingContent
+          userName="Carlos"
+          role="Secretaria de Obras"
+          avatarUri="https://i.pravatar.cc/100"
+          onPressNotification={() => {
+            // TODO: navegar pra tela de notificações
+          }}
+        />
+      </HeaderBackground>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <View style={styles.content}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
+          <TouchableOpacity onPress={() => router.push('/chamados')}>
+            <Text style={styles.verTodos}>Ver todos</Text>
+          </TouchableOpacity>
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <View style={styles.statsRow}>
+          <SummaryStatCard label="Abertos" value={abertos} color="#2ECC71" />
+          <SummaryStatCard label="Andamento" value={emAndamento} color={theme.colors.primary} />
+          <SummaryStatCard label="Concluídos" value={concluidos} color={theme.colors.danger} />
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        <Text style={styles.sectionTitle}>Urgentes</Text>
+        <ChamadosList chamados={urgentes} onSelectChamado={irParaDetalhe} scrollEnabled={false} />
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <MapPreview
+          onVerMapaCompleto={() => {
+            // TODO: navegar pra tela de mapa completo
+          }}
+        />
+      </View>
+      <FooterLogo />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  content: {
+    padding: 20,
+    gap: 16,
+  },
+  sectionHeader: {
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  sectionTitle: {
+    fontFamily: theme.fonts.medium,
+    fontSize: 16,
+    color: '#222',
   },
-  title: {
-    textAlign: 'center',
+  verTodos: {
+    fontFamily: theme.fonts.medium,
+    fontSize: 13,
+    color: theme.colors.primary,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    overflow: 'hidden',
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
 });
