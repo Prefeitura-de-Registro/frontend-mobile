@@ -1,10 +1,3 @@
-Com certeza, paizão! Peguei a sua estrutura base e adaptei inteirinho para a realidade do nosso projeto mobile (Expo Router, React Native, TypeScript, Atomic Design e o contexto real da Prefeitura de Registro e Fatec).
-
-Aqui está o `README.md` pronto para você copiar, colar e substituir no seu projeto:
-
----
-
-```markdown
 # Mobile — Aplicativo do Operador e Munícipe (Fala Registro!)
 
 Aplicativo mobile desenvolvido para a Prefeitura de Registro no âmbito da disciplina de Laboratório de Práticas do curso de Desenvolvimento de Software Multiplataforma da **FATEC Registro**. O sistema otimiza o fluxo de atendimento, comunicação e gerenciamento de ocorrências urbanas entre munícipes e secretarias municipais.
