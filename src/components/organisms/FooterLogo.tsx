@@ -3,7 +3,7 @@ import { Image, StyleSheet, View } from 'react-native';
 export function FooterLogo() {
   return (
     <View style={styles.container}>
-      <Image source={require('@/assets/images/brasao-registro.png')} resizeMode="contain" />
+      <Image source={require('@/assets/images/brasao-registro.png')} style={{width: 50, height: 50}} />
       <Image source={require('@/assets/images/fatec-registro.png')} resizeMode="contain" />
     </View>
   );
