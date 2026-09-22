@@ -47,11 +47,12 @@ O **Fala Registro!** é uma solução multiplataforma voltada para a gestão pú
 Siga os passos abaixo para rodar o projeto mobile em sua máquina:
 
 1. **Clone o repositório:**
-   ```bash
-   git clone <url-do-repositorio>
-   cd <nome-da-pasta>
-
+```bash
+git clone <url-do-repositorio>
+cd <nome-da-pasta>
 ```
+
+
 
 2. **Instale as dependências:**
 ```bash
@@ -125,9 +126,3 @@ src/
 * **Emulador:** Caso o emulador Android feche sozinho ao iniciar (`The emulator process has terminated`), utilize a opção **Cold Boot Now** no Device Manager do Android Studio.
 * **Design System:** Evite criar estilos isolados nas telas; utilize sempre as constantes globais de tema (`@/constants`) para manter a fidelidade com o Figma da Prefeitura.
 
-```
-
----
-Prontinho! Ficou redondo, documentando exatamente a nossa arquitetura atual, o fluxo por rotas e a organização do projeto.
-
-```
