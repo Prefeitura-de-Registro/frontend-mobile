@@ -45,7 +45,9 @@
           "locationAlwaysAndWhenInUsePermission": "Permitir que o app acesse sua localização para exibir os chamados no mapa."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
