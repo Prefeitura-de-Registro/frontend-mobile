@@ -1,8 +1,3 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { CardChamadoDetalhe } from '@/components/organisms/CardChamadoDetalhe';
@@ -11,8 +6,10 @@ import { theme } from '@/constants';
 import { assumirTicket, buscarTicketPorId } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
-
-import { styles } from './style';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DetalhesChamadoScreen() {
   const router = useRouter();
@@ -105,3 +102,26 @@ export default function DetalhesChamadoScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardWrapper: {},
+  footer: {
+    alignItems: 'center',
+    marginTop: 28,
+  },
+  logo: {
+    width: 150,
+    height: 48,
+    opacity: 0.9,
+  },
+})

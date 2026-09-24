@@ -5,11 +5,11 @@ import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { PhotoUploadBox } from '@/components/molecules/PhotoUploadBox';
 import { InfoRow } from '@/components/organisms/InfoRow';
+import { theme } from '@/constants';
 import { mockChamados } from '@/data/mockChamados'; // Importa o mock oficial
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { styles } from './style';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 type Resultado = 'resolvido' | 'parcial' | 'nao_resolvido' | null;
 
@@ -107,3 +107,66 @@ export default function FinalizarAtendimentoScreen() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+   container: {
+      flex: 1,
+      backgroundColor: 'white',
+      
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: 60,
+    },
+    card: {
+      marginTop: -20,
+      marginHorizontal: 24,
+      backgroundColor: '#F6F6F6',
+      borderRadius: 20,
+      paddingHorizontal: 20,
+      paddingTop: 24,
+      paddingBottom: 28,
+      gap: 20,
+      
+    },
+    chamadoHeader: {
+      alignItems: 'center',
+      gap: 4,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#DCE2E8',
+    },
+    chamadoTitulo: {
+      fontFamily: theme.fonts.bold,
+      fontSize: 22,
+      color: theme.colors.primary,
+    },
+    chamadoCodigo: {
+      fontFamily: theme.fonts.regular,
+      fontSize: 13,
+      color: '#333',
+    },
+    section: {
+      gap: 8,
+      
+    },
+    sectionTitle: {
+      fontFamily: theme.fonts.bold,
+      fontSize: 15,
+      color: '#222',
+    },
+    sectionSubtitle: {
+      fontFamily: theme.fonts.regular,
+      fontSize: 13,
+      color: '#777',
+      marginTop: -4,
+    },
+    radioGroup: {
+      gap: 2,
+    },
+    buttonWrapper: {
+      marginTop: 8,
+    },
+})
