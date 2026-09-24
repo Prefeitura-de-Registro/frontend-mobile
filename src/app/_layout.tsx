@@ -36,7 +36,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   if (usuario && naTelaDeLogin) {
-    return <Redirect href="/chamados" />;
+    return <Redirect href="/" />;
   }
 
   return <>{children}</>;
