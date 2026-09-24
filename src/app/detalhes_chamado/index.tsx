@@ -1,13 +1,16 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { CardChamadoDetalhe } from '@/components/organisms/CardChamadoDetalhe';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
-import { mockChamados } from '@/data/mockChamados'; // Importa o mock oficial
+import { theme } from '@/constants';
+import { assumirTicket, buscarTicketPorId } from '@/services/tickets.service';
+import { Chamado } from '@/types/chamado';
+import { mapTicketToChamado } from '@/utils/ticket-mapper';
 
 import { styles } from './style';
 
@@ -16,7 +19,50 @@ export default function DetalhesChamadoScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const chamadoAtual = mockChamados.find((c) => c.id === id) || mockChamados[0];
+  // Antes vinha de mockChamados.find(...); agora é carregado da API
+  const [chamado, setChamado] = useState<Chamado | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+  const [assumindo, setAssumindo] = useState(false);
+
+  const carregarChamado = useCallback(async () => {
+    if (!id) return;
+
+    setLoading(true);
+    setErro(null);
+
+    try {
+      const ticket = await buscarTicketPorId(Number(id));
+      setChamado(mapTicketToChamado(ticket));
+    } catch (error) {
+      console.error('[detalhes_chamado] erro ao buscar ticket', error);
+      setErro('Não foi possível carregar esse chamado.');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    carregarChamado();
+  }, [carregarChamado]);
+
+  async function handleAtender() {
+    if (!id) return;
+
+    setAssumindo(true);
+
+    try {
+      const ticketAtualizado = await assumirTicket(Number(id));
+      setChamado(mapTicketToChamado(ticketAtualizado));
+    } catch (error) {
+      // TODO: mostrar um toast/alerta de erro pro usuário — por exemplo,
+      // o backend retorna 409 se o ticket já tiver sido assumido por outra
+      // pessoa entre o momento em que a tela carregou e o clique aqui.
+      console.error('[detalhes_chamado] erro ao assumir ticket', error);
+    } finally {
+      setAssumindo(false);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -34,12 +80,23 @@ export default function DetalhesChamadoScreen() {
 
         <View style={styles.contentContainer}>
           <View style={styles.cardWrapper}>
-            <CardChamadoDetalhe
-              chamado={chamadoAtual}
-              onTransferir={() => console.log('Transferir acionado')}
-              onAtender={() => console.log('Atender acionado')}
-              onFinalizar={() => router.push(`/finalizar_atendimento?id=${chamadoAtual.id}`)}
-            />
+            {loading ? (
+              <ActivityIndicator color={theme.colors.primary} size="large" />
+            ) : erro || !chamado ? (
+              <Text>{erro ?? 'Chamado não encontrado.'}</Text>
+            ) : (
+              <CardChamadoDetalhe
+                chamado={chamado}
+                onTransferir={() => {
+                  // TODO: ainda não existe tela/fluxo de "transferir" no
+                  // app. No backend isso é POST /api/tickets/:id/solicitacoes
+                  // (precisa escolher o departamento de destino antes).
+                  console.log('Transferir acionado');
+                }}
+                onAtender={assumindo ? undefined : handleAtender}
+                onFinalizar={() => router.push(`/finalizar_atendimento?id=${chamado.id}`)}
+              />
+            )}
           </View>
         </View>
       </ScrollView>
