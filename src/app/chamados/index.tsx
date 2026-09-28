@@ -10,7 +10,7 @@ import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ChamadosScreen() {
@@ -25,7 +25,7 @@ export default function ChamadosScreen() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  async function carregarChamados() {
+  const carregarChamados = useCallback(async () => {
     setLoading(true);
     setErro(null);
 
@@ -38,11 +38,11 @@ export default function ChamadosScreen() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     carregarChamados();
-  }, []);
+  }, [carregarChamados]);
 
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
