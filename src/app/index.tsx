@@ -5,22 +5,44 @@ import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { MapPreview } from '@/components/organisms/MapPreview';
 import { theme } from '@/constants';
-import { mockChamados } from '@/data/mockChamados';
+import { listarTickets } from '@/services/tickets.service';
+import { Chamado } from '@/types/chamado';
+import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-// ajuste o caminho abaixo se o nome/local do arquivo for outro no seu projeto
-
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeOperadorScreen() {
   const router = useRouter();
+  const [chamados, setChamados] = useState<Chamado[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const abertos = mockChamados.filter((c) => c.status === 'aberto').length;
-  const emAndamento = mockChamados.filter((c) => c.status === 'em_atendimento').length;
-  const concluidos = mockChamados.filter((c) => c.status === 'concluido').length;
-  const urgentes = mockChamados.filter((c) => c.prioridade === 'urgente');
+  const carregarDadosHome = useCallback(async () => {
+    setLoading(true);
+    setErro(null);
+    try {
+      const resposta = await listarTickets({ page: 1, limit: 50 });
+      setChamados(resposta.data.map(mapTicketToChamado));
+    } catch (error) {
+      console.error('[home] erro ao carregar tickets', error);
+      setErro('Não foi possível carregar os dados.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarDadosHome();
+  }, [carregarDadosHome]);
+
+  const abertos = chamados.filter((c) => c.status === 'aberto').length;
+  const emAndamento = chamados.filter((c) => c.status === 'em_atendimento').length;
+  const concluidos = chamados.filter((c) => c.status === 'concluido').length;
+  const urgentes = chamados.filter((c) => c.prioridade === 'urgente');
 
   function irParaDetalhe(id: string) {
-    router.push(`/chamados/${id}`);
+    router.push(`/detalhes_chamado?id=${id}`);
   }
 
   return (
@@ -31,7 +53,7 @@ export default function HomeOperadorScreen() {
           role="Secretaria de Obras"
           avatarUri="https://i.pravatar.cc/100"
           onPressNotification={() => {
-            // TODO: navegar pra tela de notificações
+            // TODO: navegar pra tela de notificação
           }}
         />
       </HeaderBackground>
@@ -51,7 +73,18 @@ export default function HomeOperadorScreen() {
         </View>
 
         <Text style={styles.sectionTitle}>Urgentes</Text>
-        <ChamadosList chamados={urgentes} onSelectChamado={irParaDetalhe} scrollEnabled={false} />
+
+        {loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color={theme.colors.primary} size="large" />
+          </View>
+        ) : erro ? (
+          <View style={styles.centered}>
+            <Text style={styles.erroText}>{erro}</Text>
+          </View>
+        ) : (
+          <ChamadosList chamados={urgentes} onSelectChamado={irParaDetalhe} scrollEnabled={false} />
+        )}
 
         <MapPreview
           onVerMapaCompleto={() => {
@@ -59,6 +92,7 @@ export default function HomeOperadorScreen() {
           }}
         />
       </View>
+
       <FooterLogo />
     </ScrollView>
   );
@@ -97,5 +131,15 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     gap: 12,
+  },
+  centered: {
+    paddingVertical: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  erroText: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 14,
+    color: '#777',
   },
 });

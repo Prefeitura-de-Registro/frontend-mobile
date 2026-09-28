@@ -2,23 +2,40 @@ import { InputMatricula } from '@/components/atoms/InputMatricula';
 import { InputPassword } from '@/components/atoms/InputPassword';
 import { PrimaryButton } from '@/components/atoms/PrimaryButton';
 import { theme } from '@/constants';
-import { router } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginOperadorScreen() {
+  const { signIn } = useAuth();
   const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  function handleLogin() {
-    console.log('Login com:', matricula, senha);
-    router.push('/chamados');
+  async function handleLogin() {
+    setErro(null);
+    setEnviando(true);
+
+    try {
+      // TODO(backend/produto): ver o comentário em
+      // src/services/auth.service.ts — hoje isso aqui é mandado como
+      // "email" pro backend, porque não existe matrícula lá.
+      await signIn(matricula, senha);
+      // Não precisa navegar manualmente: o AuthGate em _layout.tsx já
+      // redireciona pra /chamados assim que o "usuario" deixa de ser null.
+    } catch (error: any) {
+      const mensagem = error?.response?.data?.message ?? 'Matrícula ou senha inválidos.';
+      setErro(mensagem);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container} bounces={false}>
       {/* Topo maior exclusivo para a tela de Login com o degradê e o brasão */}
-      <ImageBackground 
+      <ImageBackground
         source={require('@/assets/images/degrade-registro.png')} // Caminho da imagem do degradê
         style={styles.headerContainer}
         resizeMode="cover"
@@ -34,17 +51,11 @@ export default function LoginOperadorScreen() {
         <Text style={styles.title}>Bem-vindo de volta!</Text>
 
         <View style={styles.inputGroup}>
-          <InputMatricula
-            value={matricula}
-            onChangeText={setMatricula}
-            placeholder="Matrícula"
-          />
+          <InputMatricula value={matricula} onChangeText={setMatricula} placeholder="Matrícula" />
 
-          <InputPassword
-            value={senha}
-            onChangeText={setSenha}
-            placeholder="Senha"
-          />
+          <InputPassword value={senha} onChangeText={setSenha} placeholder="Senha" />
+
+          {erro && <Text style={styles.erroText}>{erro}</Text>}
 
           <TouchableOpacity style={styles.forgotPasswordButton} activeOpacity={0.7}>
             <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
@@ -52,7 +63,7 @@ export default function LoginOperadorScreen() {
         </View>
 
         <View style={styles.buttonWrapper}>
-          <PrimaryButton label="Entrar" onPress={handleLogin} />
+          <PrimaryButton label="Entrar" onPress={handleLogin} loading={enviando} />
         </View>
       </View>
     </ScrollView>
@@ -66,7 +77,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     width: '100%',
-    height: 340, 
+    height: 340,
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 40,
@@ -92,6 +103,12 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 16,
     marginBottom: 12,
+  },
+  erroText: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 13,
+    color: theme.colors.danger,
+    textAlign: 'center',
   },
   forgotPasswordButton: {
     alignSelf: 'flex-end',

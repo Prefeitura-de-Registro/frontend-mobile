@@ -5,12 +5,13 @@ import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { theme } from '@/constants';
-import { mockChamados } from '@/data/mockChamados';
-import { PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { listarTickets } from '@/services/tickets.service';
+import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
-import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ChamadosScreen() {
   const router = useRouter();
@@ -20,6 +21,32 @@ export default function ChamadosScreen() {
   const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
   const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
 
+  // Antes vinha de mockChamados; agora é carregado da API (ver useEffect abaixo)
+  const [chamados, setChamados] = useState<Chamado[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const carregarChamados = useCallback(async () => {
+    setLoading(true);
+    setErro(null);
+
+    try {
+      const resposta = await listarTickets({ page: 1, limit: 50 });
+      setChamados(resposta.data.map(mapTicketToChamado));
+    } catch (error) {
+      // TODO(login): quando a tela de login existir, tratar 401 aqui
+      // redirecionando pro login em vez de só mostrar mensagem de erro.
+      console.error('[chamados] erro ao listar tickets', error);
+      setErro('Não foi possível carregar os chamados.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarChamados();
+  }, [carregarChamados]);
+
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
   }
@@ -28,18 +55,15 @@ export default function ChamadosScreen() {
     setTipos((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   }
 
-  // Filtragem dinâmica de chamados
-  const chamadosFiltrados = mockChamados.filter((c) => {
-    // Filtro por texto de busca
+  // Filtragem continua 100% no client, só mudou de onde os dados vêm
+  const chamadosFiltrados = chamados.filter((c) => {
     const matchSearch = c.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.includes(searchQuery);
-    
-    // Filtro pelas abas superiores
+
     let matchTab = true;
     if (activeTab === 'Abertos') matchTab = c.status === 'aberto';
     if (activeTab === 'Em andamento') matchTab = c.status === 'em_atendimento';
     if (activeTab === 'Concluídos') matchTab = c.status === 'concluido';
 
-    // Filtros do BottomSheet
     const matchPrioridade = prioridades.length === 0 || prioridades.includes(c.prioridade);
     const matchTipo = tipos.length === 0 || tipos.includes(c.tipo);
 
@@ -77,10 +101,23 @@ export default function ChamadosScreen() {
 
         {/* Lista de chamados */}
         <View style={styles.listContainer}>
-          <ChamadosList 
-            chamados={chamadosFiltrados} 
-            onSelectChamado={(id) => router.push(`/detalhes_chamado?id=${id}`)} 
-          />
+          {loading ? (
+            <View style={styles.centered}>
+              <ActivityIndicator color={theme.colors.primary} size="large" />
+            </View>
+          ) : erro ? (
+            <View style={styles.centered}>
+              <Text style={styles.erroText}>{erro}</Text>
+              <TouchableOpacity onPress={carregarChamados} activeOpacity={0.7}>
+                <Text style={styles.tentarNovamente}>Tentar novamente</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <ChamadosList
+              chamados={chamadosFiltrados}
+              onSelectChamado={(id) => router.push(`/detalhes_chamado?id=${id}`)}
+            />
+          )}
         </View>
       </View>
 
@@ -89,20 +126,20 @@ export default function ChamadosScreen() {
         <FooterLogo />
       </View>
 
-       {/* Modal de Filtros Avançados */}
-        <FiltroBottomSheet
-          visible={filtroVisible}
-          prioridadesSelecionadas={prioridades}
-          tiposSelecionados={tipos}
-          onTogglePrioridade={togglePrioridade}
-          onToggleTipo={toggleTipo}
-          onLimpar={() => {
-            setPrioridades([]);
-            setTipos([]);
-          }}
-          onAplicar={() => setFiltroVisible(false)}
-          onClose={() => setFiltroVisible(false)}
-        />
+      {/* Modal de Filtros Avançados */}
+      <FiltroBottomSheet
+        visible={filtroVisible}
+        prioridadesSelecionadas={prioridades}
+        tiposSelecionados={tipos}
+        onTogglePrioridade={togglePrioridade}
+        onToggleTipo={toggleTipo}
+        onLimpar={() => {
+          setPrioridades([]);
+          setTipos([]);
+        }}
+        onAplicar={() => setFiltroVisible(false)}
+        onClose={() => setFiltroVisible(false)}
+      />
     </View>
   );
 }
@@ -144,6 +181,25 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     marginBottom: 12,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingTop: 40,
+  },
+  erroText: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 14,
+    color: '#777',
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  tentarNovamente: {
+    fontFamily: theme.fonts.bold,
+    fontSize: 14,
+    color: theme.colors.primary,
   },
   footerContainer: {
     paddingVertical: 12,
