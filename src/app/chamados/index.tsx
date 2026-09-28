@@ -10,7 +10,7 @@ import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ChamadosScreen() {
@@ -21,12 +21,11 @@ export default function ChamadosScreen() {
   const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
   const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
 
-  // Antes vinha de mockChamados; agora é carregado da API (ver useEffect abaixo)
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  const carregarChamados = useCallback(async () => {
+  async function carregarChamados() {
     setLoading(true);
     setErro(null);
 
@@ -34,18 +33,16 @@ export default function ChamadosScreen() {
       const resposta = await listarTickets({ page: 1, limit: 50 });
       setChamados(resposta.data.map(mapTicketToChamado));
     } catch (error) {
-      // TODO(login): quando a tela de login existir, tratar 401 aqui
-      // redirecionando pro login em vez de só mostrar mensagem de erro.
       console.error('[chamados] erro ao listar tickets', error);
       setErro('Não foi possível carregar os chamados.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }
 
   useEffect(() => {
     carregarChamados();
-  }, [carregarChamados]);
+  }, []);
 
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
@@ -55,7 +52,6 @@ export default function ChamadosScreen() {
     setTipos((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   }
 
-  // Filtragem continua 100% no client, só mudou de onde os dados vêm
   const chamadosFiltrados = chamados.filter((c) => {
     const matchSearch = c.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.includes(searchQuery);
 
@@ -72,13 +68,11 @@ export default function ChamadosScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho com degradê e botão de voltar */}
       <HeaderBackground height={130}>
         <HeaderNavigationContent title="Chamados" onPressBack={() => router.back()} />
       </HeaderBackground>
 
       <View style={styles.content}>
-        {/* Abas de filtro superior e botão de abrir modal de filtros */}
         <View style={styles.filterBarRow}>
           <View style={styles.tabsRow}>
             {(['Todos', 'Abertos', 'Em andamento', 'Concluídos'] as const).map((tab, index, arr) => (
@@ -94,12 +88,10 @@ export default function ChamadosScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Input de busca */}
         <View style={styles.searchWrapper}>
           <SearchInput value={searchQuery} onChangeText={setSearchQuery} />
         </View>
 
-        {/* Lista de chamados */}
         <View style={styles.listContainer}>
           {loading ? (
             <View style={styles.centered}>
@@ -121,12 +113,10 @@ export default function ChamadosScreen() {
         </View>
       </View>
 
-      {/* Rodapé fixo na parte inferior */}
       <View style={styles.footerContainer}>
         <FooterLogo />
       </View>
 
-      {/* Modal de Filtros Avançados */}
       <FiltroBottomSheet
         visible={filtroVisible}
         prioridadesSelecionadas={prioridades}

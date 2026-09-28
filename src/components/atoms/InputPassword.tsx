@@ -1,8 +1,8 @@
-    import { theme } from '@/constants';
+import { theme } from '@/constants';
 import { Lock } from 'lucide-react-native';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 
-interface InputPasswordProps extends TextInputProps {}
+export type InputPasswordProps = TextInputProps;
 
 export function InputPassword(props: InputPasswordProps) {
   return (

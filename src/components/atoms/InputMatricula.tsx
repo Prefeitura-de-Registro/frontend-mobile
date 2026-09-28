@@ -2,7 +2,7 @@ import { theme } from '@/constants';
 import { Mail } from 'lucide-react-native';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 
-interface InputMatriculaProps extends TextInputProps {}
+export type InputMatriculaProps = TextInputProps;
 
 export function InputMatricula(props: InputMatriculaProps) {
   return (

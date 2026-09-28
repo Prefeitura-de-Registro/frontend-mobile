@@ -9,7 +9,7 @@ import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeOperadorScreen() {
@@ -18,23 +18,35 @@ export default function HomeOperadorScreen() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  const carregarDadosHome = useCallback(async () => {
-    setLoading(true);
-    setErro(null);
-    try {
-      const resposta = await listarTickets({ page: 1, limit: 50 });
-      setChamados(resposta.data.map(mapTicketToChamado));
-    } catch (error) {
-      console.error('[home] erro ao carregar tickets', error);
-      setErro('Não foi possível carregar os dados.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
+    let isMounted = true;
+
+    async function carregarDadosHome() {
+      setLoading(true);
+      setErro(null);
+      try {
+        const resposta = await listarTickets({ page: 1, limit: 50 });
+        if (isMounted) {
+          setChamados(resposta.data.map(mapTicketToChamado));
+        }
+      } catch (error) {
+        console.error('[home] erro ao carregar tickets', error);
+        if (isMounted) {
+          setErro('Não foi possível carregar os dados.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
     carregarDadosHome();
-  }, [carregarDadosHome]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const abertos = chamados.filter((c) => c.status === 'aberto').length;
   const emAndamento = chamados.filter((c) => c.status === 'em_atendimento').length;

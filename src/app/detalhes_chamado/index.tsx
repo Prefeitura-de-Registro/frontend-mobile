@@ -7,41 +7,38 @@ import { assumirTicket, buscarTicketPorId } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DetalhesChamadoScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Antes vinha de mockChamados.find(...); agora é carregado da API
   const [chamado, setChamado] = useState<Chamado | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [assumindo, setAssumindo] = useState(false);
 
-  const carregarChamado = useCallback(async () => {
-    if (!id) return;
-
-    setLoading(true);
-    setErro(null);
-
-    try {
-      const ticket = await buscarTicketPorId(Number(id));
-      setChamado(mapTicketToChamado(ticket));
-    } catch (error) {
-      console.error('[detalhes_chamado] erro ao buscar ticket', error);
-      setErro('Não foi possível carregar esse chamado.');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
   useEffect(() => {
+    async function carregarChamado() {
+      if (!id) return;
+
+      setLoading(true);
+      setErro(null);
+
+      try {
+        const ticket = await buscarTicketPorId(Number(id));
+        setChamado(mapTicketToChamado(ticket));
+      } catch (error) {
+        console.error('[detalhes_chamado] erro ao buscar ticket', error);
+        setErro('Não foi possível carregar esse chamado.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
     carregarChamado();
-  }, [carregarChamado]);
+  }, [id]);
 
   async function handleAtender() {
     if (!id) return;
@@ -52,9 +49,6 @@ export default function DetalhesChamadoScreen() {
       const ticketAtualizado = await assumirTicket(Number(id));
       setChamado(mapTicketToChamado(ticketAtualizado));
     } catch (error) {
-      // TODO: mostrar um toast/alerta de erro pro usuário — por exemplo,
-      // o backend retorna 409 se o ticket já tiver sido assumido por outra
-      // pessoa entre o momento em que a tela carregou e o clique aqui.
       console.error('[detalhes_chamado] erro ao assumir ticket', error);
     } finally {
       setAssumindo(false);
@@ -85,9 +79,6 @@ export default function DetalhesChamadoScreen() {
               <CardChamadoDetalhe
                 chamado={chamado}
                 onTransferir={() => {
-                  // TODO: ainda não existe tela/fluxo de "transferir" no
-                  // app. No backend isso é POST /api/tickets/:id/solicitacoes
-                  // (precisa escolher o departamento de destino antes).
                   console.log('Transferir acionado');
                 }}
                 onAtender={assumindo ? undefined : handleAtender}
@@ -124,4 +115,4 @@ const styles = StyleSheet.create({
     height: 48,
     opacity: 0.9,
   },
-})
+});
