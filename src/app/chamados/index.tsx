@@ -5,12 +5,13 @@ import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { theme } from '@/constants';
-import { mockChamados } from '@/data/mockChamados';
-import { PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { listarTickets } from '@/services/tickets.service';
+import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
-import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ChamadosScreen() {
   const router = useRouter();
@@ -20,6 +21,42 @@ export default function ChamadosScreen() {
   const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
   const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
 
+  const [chamados, setChamados] = useState<Chamado[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    async function carregar() {
+      try {
+        const resposta = await listarTickets({ page: 1, limit: 50 });
+        if (cancelado) return;
+        setChamados(resposta.data.map(mapTicketToChamado));
+        setErro(null);
+      } catch (error) {
+        if (cancelado) return;
+        console.error('[chamados] erro ao listar tickets', error);
+        setErro('Não foi possível carregar os chamados.');
+      } finally {
+        if (!cancelado) setLoading(false);
+      }
+    }
+
+    carregar();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [reloadKey]);
+
+  function tentarNovamente() {
+    setLoading(true);
+    setErro(null);
+    setReloadKey((k) => k + 1);
+  }
+
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
   }
@@ -28,18 +65,14 @@ export default function ChamadosScreen() {
     setTipos((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   }
 
-  // Filtragem dinâmica de chamados
-  const chamadosFiltrados = mockChamados.filter((c) => {
-    // Filtro por texto de busca
+  const chamadosFiltrados = chamados.filter((c) => {
     const matchSearch = c.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.includes(searchQuery);
-    
-    // Filtro pelas abas superiores
+
     let matchTab = true;
     if (activeTab === 'Abertos') matchTab = c.status === 'aberto';
     if (activeTab === 'Em andamento') matchTab = c.status === 'em_atendimento';
     if (activeTab === 'Concluídos') matchTab = c.status === 'concluido';
 
-    // Filtros do BottomSheet
     const matchPrioridade = prioridades.length === 0 || prioridades.includes(c.prioridade);
     const matchTipo = tipos.length === 0 || tipos.includes(c.tipo);
 
@@ -48,13 +81,11 @@ export default function ChamadosScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho com degradê e botão de voltar */}
       <HeaderBackground height={130}>
         <HeaderNavigationContent title="Chamados" onPressBack={() => router.back()} />
       </HeaderBackground>
 
       <View style={styles.content}>
-        {/* Abas de filtro superior e botão de abrir modal de filtros */}
         <View style={styles.filterBarRow}>
           <View style={styles.tabsRow}>
             {(['Todos', 'Abertos', 'Em andamento', 'Concluídos'] as const).map((tab, index, arr) => (
@@ -70,39 +101,48 @@ export default function ChamadosScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Input de busca */}
         <View style={styles.searchWrapper}>
           <SearchInput value={searchQuery} onChangeText={setSearchQuery} />
         </View>
 
-        {/* Lista de chamados */}
         <View style={styles.listContainer}>
-          <ChamadosList 
-            chamados={chamadosFiltrados} 
-            onSelectChamado={(id) => router.push(`/detalhes_chamado?id=${id}`)} 
-          />
+          {loading ? (
+            <View style={styles.centered}>
+              <ActivityIndicator color={theme.colors.primary} size="large" />
+            </View>
+          ) : erro ? (
+            <View style={styles.centered}>
+              <Text style={styles.erroText}>{erro}</Text>
+              <TouchableOpacity onPress={tentarNovamente} activeOpacity={0.7}>
+                <Text style={styles.tentarNovamente}>Tentar novamente</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <ChamadosList
+              chamados={chamadosFiltrados}
+              onSelectChamado={(id) => router.push(`/detalhes_chamado?id=${id}`)}
+            />
+          )}
         </View>
       </View>
 
-      {/* Rodapé fixo na parte inferior */}
       <View style={styles.footerContainer}>
         <FooterLogo />
       </View>
 
-       {/* Modal de Filtros Avançados */}
-        <FiltroBottomSheet
-          visible={filtroVisible}
-          prioridadesSelecionadas={prioridades}
-          tiposSelecionados={tipos}
-          onTogglePrioridade={togglePrioridade}
-          onToggleTipo={toggleTipo}
-          onLimpar={() => {
-            setPrioridades([]);
-            setTipos([]);
-          }}
-          onAplicar={() => setFiltroVisible(false)}
-          onClose={() => setFiltroVisible(false)}
-        />
+      <FiltroBottomSheet
+        visible={filtroVisible}
+        prioridadesSelecionadas={prioridades}
+        tiposSelecionados={tipos}
+        onTogglePrioridade={togglePrioridade}
+        onToggleTipo={toggleTipo}
+        onLimpar={() => {
+          setPrioridades([]);
+          setTipos([]);
+        }}
+        onAplicar={() => setFiltroVisible(false)}
+        onClose={() => setFiltroVisible(false)}
+      />
     </View>
   );
 }
@@ -144,6 +184,25 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     marginBottom: 12,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingTop: 40,
+  },
+  erroText: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 14,
+    color: '#777',
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  tentarNovamente: {
+    fontFamily: theme.fonts.bold,
+    fontSize: 14,
+    color: theme.colors.primary,
   },
   footerContainer: {
     paddingVertical: 12,
