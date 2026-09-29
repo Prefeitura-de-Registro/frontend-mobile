@@ -74,7 +74,7 @@ export default function ChamadosScreen() {
             onPress={() => setFiltroVisible(true)} 
             activeOpacity={0.8}
           >
-            <SlidersHorizontal size={20} color="#FFFFFF" />
+            <SlidersHorizontal size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -124,20 +124,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F2F2F2',
   },
-  headerTopContainer: {
-    width: '100%',
-    paddingBottom: 8,
-  },
   content: {
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
   },
+  headerTopContainer: {
+    width: '100%',
+  },
   searchFilterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginTop: 50,
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: theme.colors.primary,
@@ -145,11 +143,10 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    height: 40,
+    height: 44,
     justifyContent: 'center',
     borderRadius: 999,
-    borderWidth: 0,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 0,
     elevation: 2,
     shadowColor: '#000',
@@ -161,9 +158,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: theme.colors.primary,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },

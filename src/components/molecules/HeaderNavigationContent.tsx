@@ -1,6 +1,7 @@
 import { theme } from '@/constants';
 import { ChevronLeft } from 'lucide-react-native';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HeaderNavigationContentProps {
   title: string;
@@ -8,17 +9,15 @@ interface HeaderNavigationContentProps {
 }
 
 export function HeaderNavigationContent({ title, onPressBack }: HeaderNavigationContentProps) {
-  return (
-    <View style={styles.row}>
-      <View>
-        <TouchableOpacity onPress={onPressBack} style={styles.backButton} activeOpacity={0.8}>
-          <ChevronLeft size={22} color="white" />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.title}>{title}</Text>
-      <View style={{width: 22, height: 22}}>
+  const insets = useSafeAreaInsets();
 
-      </View>
+  return (
+    <View style={[styles.row, { paddingTop: insets.top + 16 }]}>
+      <TouchableOpacity onPress={onPressBack} style={styles.backButton} activeOpacity={0.8}>
+        <ChevronLeft size={28} color="white" strokeWidth={3} />
+      </TouchableOpacity>
+      <Text style={styles.title}>{title}</Text>
+      <View style={styles.spacer} />
     </View>
   );
 }
@@ -26,16 +25,16 @@ export function HeaderNavigationContent({ title, onPressBack }: HeaderNavigation
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center', 
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 50,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     width: '100%',
-    height: 100,
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -43,8 +42,12 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: theme.fonts.bold,
     fontSize: 40,
+    lineHeight: 48,
     color: theme.colors.primary,
-    lineHeight: 40, 
     textAlign: 'center',
+  },
+  spacer: {
+    width: 44,
+    height: 44,
   },
 });
