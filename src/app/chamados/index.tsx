@@ -10,7 +10,7 @@ import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ChamadosScreen() {
@@ -24,25 +24,38 @@ export default function ChamadosScreen() {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-
-  const carregarChamados = useCallback(async () => {
-    setLoading(true);
-    setErro(null);
-
-    try {
-      const resposta = await listarTickets({ page: 1, limit: 50 });
-      setChamados(resposta.data.map(mapTicketToChamado));
-    } catch (error) {
-      console.error('[chamados] erro ao listar tickets', error);
-      setErro('Não foi possível carregar os chamados.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    carregarChamados();
-  }, [carregarChamados]);
+    let cancelado = false;
+
+    async function carregar() {
+      try {
+        const resposta = await listarTickets({ page: 1, limit: 50 });
+        if (cancelado) return;
+        setChamados(resposta.data.map(mapTicketToChamado));
+        setErro(null);
+      } catch (error) {
+        if (cancelado) return;
+        console.error('[chamados] erro ao listar tickets', error);
+        setErro('Não foi possível carregar os chamados.');
+      } finally {
+        if (!cancelado) setLoading(false);
+      }
+    }
+
+    carregar();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [reloadKey]);
+
+  function tentarNovamente() {
+    setLoading(true);
+    setErro(null);
+    setReloadKey((k) => k + 1);
+  }
 
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
@@ -100,7 +113,7 @@ export default function ChamadosScreen() {
           ) : erro ? (
             <View style={styles.centered}>
               <Text style={styles.erroText}>{erro}</Text>
-              <TouchableOpacity onPress={carregarChamados} activeOpacity={0.7}>
+              <TouchableOpacity onPress={tentarNovamente} activeOpacity={0.7}>
                 <Text style={styles.tentarNovamente}>Tentar novamente</Text>
               </TouchableOpacity>
             </View>

@@ -3,6 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
+
+
 if (!API_URL) {
   console.warn(
     '[api] EXPO_PUBLIC_API_URL não definida. Crie um .env na raiz do projeto ' +
