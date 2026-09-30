@@ -8,7 +8,7 @@ import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ChamadosScreen() {
@@ -23,27 +23,35 @@ export default function ChamadosScreen() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  const carregarChamados = useCallback(async () => {
-    try {
-      const resposta = await listarTickets({ page: 1, limit: 50 });
-      setChamados(resposta.data.map(mapTicketToChamado));
-      setErro(null);
-    } catch (error) {
-      console.error('[chamados] erro ao listar tickets', error);
-      setErro('Não foi possível carregar os chamados.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
-    carregarChamados();
-  }, [carregarChamados]);
+    let cancelado = false;
+
+    listarTickets({ page: 1, limit: 50 })
+      .then((resposta) => {
+        if (cancelado) return;
+        setChamados(resposta.data.map(mapTicketToChamado));
+        setErro(null);
+      })
+      .catch((error) => {
+        if (cancelado) return;
+        console.error('[chamados] erro ao listar tickets', error);
+        setErro('Não foi possível carregar os chamados.');
+      })
+      .finally(() => {
+        if (!cancelado) setLoading(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [tentativa]);
 
   function tentarNovamente() {
     setLoading(true);
     setErro(null);
-    carregarChamados();
+    setTentativa((t) => t + 1);
   }
 
   function togglePrioridade(p: PrioridadeChamado) {
