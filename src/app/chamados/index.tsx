@@ -1,9 +1,7 @@
 import { SearchInput } from '@/components/atoms/SearchInput';
-import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
-import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
@@ -15,7 +13,7 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 
 export default function ChamadosScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'Todos' | 'Abertos' | 'Em andamento' | 'Concluídos'>('Todos');
+  const [activeTab] = useState<'Todos' | 'Abertos' | 'Em andamento' | 'Concluídos'>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroVisible, setFiltroVisible] = useState(false);
   const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
@@ -24,37 +22,36 @@ export default function ChamadosScreen() {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     let cancelado = false;
 
-    async function carregar() {
-      try {
-        const resposta = await listarTickets({ page: 1, limit: 50 });
+    listarTickets({ page: 1, limit: 50 })
+      .then((resposta) => {
         if (cancelado) return;
         setChamados(resposta.data.map(mapTicketToChamado));
         setErro(null);
-      } catch (error) {
+      })
+      .catch((error) => {
         if (cancelado) return;
         console.error('[chamados] erro ao listar tickets', error);
         setErro('Não foi possível carregar os chamados.');
-      } finally {
+      })
+      .finally(() => {
         if (!cancelado) setLoading(false);
-      }
-    }
-
-    carregar();
+      });
 
     return () => {
       cancelado = true;
     };
-  }, [reloadKey]);
+  }, [tentativa]);
 
   function tentarNovamente() {
     setLoading(true);
     setErro(null);
-    setReloadKey((k) => k + 1);
+    setTentativa((t) => t + 1);
   }
 
   function togglePrioridade(p: PrioridadeChamado) {
@@ -67,44 +64,35 @@ export default function ChamadosScreen() {
 
   const chamadosFiltrados = chamados.filter((c) => {
     const matchSearch = c.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.includes(searchQuery);
-
     let matchTab = true;
     if (activeTab === 'Abertos') matchTab = c.status === 'aberto';
     if (activeTab === 'Em andamento') matchTab = c.status === 'em_atendimento';
     if (activeTab === 'Concluídos') matchTab = c.status === 'concluido';
-
     const matchPrioridade = prioridades.length === 0 || prioridades.includes(c.prioridade);
     const matchTipo = tipos.length === 0 || tipos.includes(c.tipo);
-
     return matchSearch && matchTab && matchPrioridade && matchTipo;
   });
 
   return (
     <View style={styles.container}>
-      <HeaderBackground height={130}>
+      <View style={styles.headerTopContainer}>
         <HeaderNavigationContent title="Chamados" onPressBack={() => router.back()} />
-      </HeaderBackground>
 
-      <View style={styles.content}>
-        <View style={styles.filterBarRow}>
-          <View style={styles.tabsRow}>
-            {(['Todos', 'Abertos', 'Em andamento', 'Concluídos'] as const).map((tab, index, arr) => (
-              <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} activeOpacity={0.7}>
-                <Text style={[styles.tabText, activeTab === tab && styles.tabActive]}>
-                  {tab} {index < arr.length - 1 && '| '}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        <View style={styles.searchFilterRow}>
+          <View style={styles.searchWrapper}>
+            <SearchInput value={searchQuery} onChangeText={setSearchQuery} placeholder="Pesquisar" />
           </View>
-          <TouchableOpacity onPress={() => setFiltroVisible(true)} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setFiltroVisible(true)}
+            activeOpacity={0.8}
+          >
             <SlidersHorizontal size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
+      </View>
 
-        <View style={styles.searchWrapper}>
-          <SearchInput value={searchQuery} onChangeText={setSearchQuery} />
-        </View>
-
+      <View style={styles.content}>
         <View style={styles.listContainer}>
           {loading ? (
             <View style={styles.centered}>
@@ -124,10 +112,6 @@ export default function ChamadosScreen() {
             />
           )}
         </View>
-      </View>
-
-      <View style={styles.footerContainer}>
-        <FooterLogo />
       </View>
 
       <FiltroBottomSheet
@@ -150,40 +134,49 @@ export default function ChamadosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F2F2F2',
+  },
+  headerTopContainer: {
+    width: '100%',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 16,
   },
-  filterBarRow: {
+  searchFilterRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  tabsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 4,
-  },
-  tabText: {
-    fontFamily: theme.fonts.regular,
-    fontSize: 13,
-    color: '#888',
-  },
-  tabActive: {
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.primary,
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: theme.colors.primary,
   },
   searchWrapper: {
-    marginBottom: 16,
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    height: 44,
+    justifyContent: 'center',
+    borderRadius: 999,
+    paddingHorizontal: 20,
+    paddingVertical: 0,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  filterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listContainer: {
     flex: 1,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   centered: {
     flex: 1,
@@ -203,11 +196,5 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bold,
     fontSize: 14,
     color: theme.colors.primary,
-  },
-  footerContainer: {
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
   },
 });
