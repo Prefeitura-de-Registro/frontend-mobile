@@ -13,7 +13,7 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 
 export default function ChamadosScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'Todos' | 'Abertos' | 'Em andamento' | 'Concluídos'>('Todos');
+  const [activeTab] = useState<'Todos' | 'Abertos' | 'Em andamento' | 'Concluídos'>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroVisible, setFiltroVisible] = useState(false);
   const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
@@ -24,11 +24,10 @@ export default function ChamadosScreen() {
   const [erro, setErro] = useState<string | null>(null);
 
   const carregarChamados = useCallback(async () => {
-    setLoading(true);
-    setErro(null);
     try {
       const resposta = await listarTickets({ page: 1, limit: 50 });
       setChamados(resposta.data.map(mapTicketToChamado));
+      setErro(null);
     } catch (error) {
       console.error('[chamados] erro ao listar tickets', error);
       setErro('Não foi possível carregar os chamados.');
@@ -40,6 +39,12 @@ export default function ChamadosScreen() {
   useEffect(() => {
     carregarChamados();
   }, [carregarChamados]);
+
+  function tentarNovamente() {
+    setLoading(true);
+    setErro(null);
+    carregarChamados();
+  }
 
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
@@ -69,9 +74,9 @@ export default function ChamadosScreen() {
           <View style={styles.searchWrapper}>
             <SearchInput value={searchQuery} onChangeText={setSearchQuery} placeholder="Pesquisar" />
           </View>
-          <TouchableOpacity 
-            style={styles.filterButton} 
-            onPress={() => setFiltroVisible(true)} 
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setFiltroVisible(true)}
             activeOpacity={0.8}
           >
             <SlidersHorizontal size={20} color={theme.colors.primary} />
@@ -80,7 +85,6 @@ export default function ChamadosScreen() {
       </View>
 
       <View style={styles.content}>
-
         <View style={styles.listContainer}>
           {loading ? (
             <View style={styles.centered}>
@@ -89,7 +93,7 @@ export default function ChamadosScreen() {
           ) : erro ? (
             <View style={styles.centered}>
               <Text style={styles.erroText}>{erro}</Text>
-              <TouchableOpacity onPress={carregarChamados} activeOpacity={0.7}>
+              <TouchableOpacity onPress={tentarNovamente} activeOpacity={0.7}>
                 <Text style={styles.tentarNovamente}>Tentar novamente</Text>
               </TouchableOpacity>
             </View>
@@ -124,13 +128,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F2F2F2',
   },
+  headerTopContainer: {
+    width: '100%',
+  },
   content: {
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
-  },
-  headerTopContainer: {
-    width: '100%',
   },
   searchFilterRow: {
     flexDirection: 'row',
@@ -162,24 +166,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  filterBarRow: {
-    marginBottom: 16,
-  },
-  tabsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 4,
-  },
-  tabText: {
-    fontFamily: theme.fonts.regular,
-    fontSize: 13,
-    color: '#888',
-  },
-  tabActive: {
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.primary,
-  },
   listContainer: {
     flex: 1,
     marginBottom: 8,
@@ -202,11 +188,5 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bold,
     fontSize: 14,
     color: theme.colors.primary,
-  },
-  footerContainer: {
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F2F2F2',
   },
 });
