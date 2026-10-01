@@ -3,16 +3,15 @@ import { StyleSheet, Text, View } from 'react-native';
 
 interface SummaryStatCardProps {
   label: string;
-  value: number;
+  value: number | string;
   color: string;
 }
 
 export function SummaryStatCard({ label, value, color }: SummaryStatCardProps) {
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderBottomColor: color }]}>
       <Text style={styles.label}>{label}</Text>
       <Text style={[styles.value, { color }]}>{value}</Text>
-      <View style={[styles.bar, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -20,26 +19,25 @@ export function SummaryStatCard({ label, value, color }: SummaryStatCardProps) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    padding: 12,
-    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderBottomWidth: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
   },
   label: {
-    fontFamily: theme.fonts.regular,
-    fontSize: 13,
-    color: '#555',
-    marginBottom: 4,
+    fontFamily: theme.fonts.medium,
+    fontSize: 12,
+    color: '#222',
   },
   value: {
     fontFamily: theme.fonts.bold,
-    fontSize: 24,
-  },
-  bar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 3,
+    fontSize: 26,
+    lineHeight: 32,
   },
 });
