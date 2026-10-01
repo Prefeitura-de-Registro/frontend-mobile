@@ -1,56 +1,41 @@
-# Welcome to your Expo app 👋
+# Release 01/10 - Squad Mobile (Operador)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este documento contém as entregas da **Squad Mobile** referentes à release do dia **1 de outubro**, desenvolvidas para a disciplina de Laboratório de Práticas do curso de Desenvolvimento de Software Multiplataforma da FATEC Registro.
 
-## Get started
+## Resumo da Entrega
 
-1. Install dependencies
+Nesta release, concentrámo-nos no desenvolvimento avançado de novas telas operacionais e na **integração de ponta a ponta com o backend** (Node.js, Prisma e PostgreSQL), substituindo dados estáticos por requisições HTTP reais via Axios e estruturando o fluxo de autenticação e sessão com segurança.
 
-   ```bash
-   npm install
-   ```
+As principais entregas foram divididas em três frentes:
 
-2. Start the app
+### 1. Autenticação e Gestão de Sessão do Operador
 
-   ```bash
-   npx expo start
-   ```
+* **Tela de Login do Operador (`/sign_in`):**
+* Implementação dos campos de entrada de credenciais e botão de submissão integrados ao serviço de autenticação da API.
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* **Controle de Sessão e AuthGate (`_layout.tsx`):**
+* Configuração do `AuthContext` e do armazenamento seguro (`SecureStore`) para persistência do token JWT de funcionário.
+* Implementação da guarda de rotas (`AuthGate`) para redirecionamento automático pós-login e desativação de sessão via botão de notificações.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
 
-When you're ready, run:
+### 2. Integração da Home e Dashboard Principal (`/`)
 
-```bash
-npm run reset-project
-```
+* **Listagem Dinâmica e Estatísticas:**
+* Substituição dos mocks antigos por chamadas reais à API para carregar a listagem de chamados urgentes e calcular dinamicamente os contadores dos cartões de resumo estatístico.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-### Other setup steps
+* **Atalhos de Ação:**
+* Configuração do fluxo de navegação para a tela de listagem geral e detalhes de ocorrências diretamente a partir do painel de início.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+### 3. Aprimoramento da Tela de Listagem e Alinhamento Visual (`/chamados`)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+* **Integração Completa com a API:**
+* Conexão da listagem geral de tickets com os dados do servidor, utilizando o mapeador de dados (`ticket-mapper`) para adaptar o formato do backend aos componentes do app.
 
-## Join the community
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+* **Refinamento de Layout:**
+* Ajuste estrutural do cabeçalho azul estendido com a barra de pesquisa e botão de filtro incorporados, mantendo fidelidade absoluta ao design prototipado no Figma.
