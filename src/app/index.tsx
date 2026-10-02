@@ -4,6 +4,8 @@ import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { MapPreview } from '@/components/organisms/MapPreview';
+// Importação do seu novo SplashScreen
+import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
@@ -14,6 +16,9 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View
 
 export default function HomeOperadorScreen() {
   const router = useRouter();
+  
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
+  
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -57,6 +62,14 @@ export default function HomeOperadorScreen() {
     router.push(`/detalhes_chamado?id=${id}`);
   }
 
+  if (isSplashVisible) {
+    return (
+      <SplashScreen 
+        onFinish={() => setIsSplashVisible(false)} 
+      />
+    );
+  }
+
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
       <HeaderBackground height={180}>
@@ -65,7 +78,7 @@ export default function HomeOperadorScreen() {
           role="Secretaria de Obras"
           avatarUri="https://i.pravatar.cc/100"
           onPressNotification={() => {
-            // TODO: navegar pra tela de notificação
+      
           }}
         />
       </HeaderBackground>
@@ -100,7 +113,7 @@ export default function HomeOperadorScreen() {
 
         <MapPreview
           onVerMapaCompleto={() => {
-            // TODO: navegar pra tela de mapa completo
+            
           }}
         />
       </View>
