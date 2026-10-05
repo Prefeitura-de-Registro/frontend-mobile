@@ -1,24 +1,33 @@
 import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderGreetingContent } from '@/components/molecules/HeaderGreetingContent';
+import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { ChamadosList } from '@/components/organisms/ChamadosList';
 import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { MapPreview } from '@/components/organisms/MapPreview';
-// Importação do seu novo SplashScreen
 import SplashScreen from '@/components/organisms/SplashScreen';
+import { MapArea } from '@/components/organisms/MapArea';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Confira se esses valores batem com o tipo PrioridadeChamado do seu projeto.
+const PRIORIDADE_URGENTE = 'urgente';
+const PRIORIDADE_MEDIA = 'media';
+const PRIORIDADE_NORMAL = 'normal';
+
+const COR_ABERTO = '#E02424';
+const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const router = useRouter();
-  
+  const router = useRouter();  
   const [isSplashVisible, setIsSplashVisible] = useState(true);
-  
+  const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -27,8 +36,6 @@ export default function HomeOperadorScreen() {
     let isMounted = true;
 
     async function carregarDadosHome() {
-      setLoading(true);
-      setErro(null);
       try {
         const resposta = await listarTickets({ page: 1, limit: 50 });
         if (isMounted) {
@@ -53,14 +60,10 @@ export default function HomeOperadorScreen() {
     };
   }, []);
 
-  const abertos = chamados.filter((c) => c.status === 'aberto').length;
-  const emAndamento = chamados.filter((c) => c.status === 'em_atendimento').length;
-  const concluidos = chamados.filter((c) => c.status === 'concluido').length;
-  const urgentes = chamados.filter((c) => c.prioridade === 'urgente');
-
-  function irParaDetalhe(id: string) {
-    router.push(`/detalhes_chamado?id=${id}`);
-  }
+  const contarStatus = (status: Chamado['status']) =>
+    loading ? '–' : chamados.filter((c) => c.status === status).length;
+  const contarPrioridade = (prioridade: string) =>
+    loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
   if (isSplashVisible) {
     return (
@@ -91,25 +94,48 @@ export default function HomeOperadorScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.statsRow}>
-          <SummaryStatCard label="Abertos" value={abertos} color="#2ECC71" />
-          <SummaryStatCard label="Andamento" value={emAndamento} color={theme.colors.primary} />
-          <SummaryStatCard label="Concluídos" value={concluidos} color={theme.colors.danger} />
-        </View>
-
-        <Text style={styles.sectionTitle}>Urgentes</Text>
-
-        {loading ? (
-          <View style={styles.centered}>
-            <ActivityIndicator color={theme.colors.primary} size="large" />
+        <View style={styles.content}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
+            <TouchableOpacity
+              style={styles.verTodosButton}
+              onPress={() => router.push('/chamados')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.verTodosText}>Ver todos</Text>
+            </TouchableOpacity>
           </View>
-        ) : erro ? (
-          <View style={styles.centered}>
-            <Text style={styles.erroText}>{erro}</Text>
+
+          <View style={styles.row}>
+            <SummaryStatCard label="Abertos" value={contarStatus('aberto')} color={COR_ABERTO} />
+            <SummaryStatCard
+              label="Andamento"
+              value={contarStatus('em_atendimento')}
+              color={theme.colors.primary}
+            />
+            <SummaryStatCard label="Concluídos" value={contarStatus('concluido')} color={COR_CONCLUIDO} />
           </View>
-        ) : (
-          <ChamadosList chamados={urgentes} onSelectChamado={irParaDetalhe} scrollEnabled={false} />
-        )}
+
+          <View style={styles.row}>
+            <PriorityStatCard
+              label="Urgentes"
+              value={contarPrioridade(PRIORIDADE_URGENTE)}
+              color="#E02424"
+              backgroundColor="#FDE2E2"
+            />
+            <PriorityStatCard
+              label="Médio"
+              value={contarPrioridade(PRIORIDADE_MEDIA)}
+              color="#F5B800"
+              backgroundColor="#FFF6D6"
+            />
+            <PriorityStatCard
+              label="Normal"
+              value={contarPrioridade(PRIORIDADE_NORMAL)}
+              color="#1FB6D6"
+              backgroundColor="#DDF6FB"
+            />
+          </View>
 
         <MapPreview
           onVerMapaCompleto={() => {
@@ -118,19 +144,29 @@ export default function HomeOperadorScreen() {
         />
       </View>
 
-      <FooterLogo />
-    </ScrollView>
+      <MapArea />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
+  },
+  topPanel: {
+    backgroundColor: '#FFFFFF',
+    paddingBottom: 16,
+    zIndex: 1,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   content: {
-    padding: 20,
-    gap: 16,
+    paddingHorizontal: 20,
+    gap: 14,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -138,33 +174,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionTitle: {
-    fontFamily: theme.fonts.medium,
-    fontSize: 16,
-    color: '#222',
+    fontFamily: theme.fonts.bold,
+    fontSize: 17,
+    color: theme.colors.primary,
   },
-  verTodos: {
+  verTodosButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  verTodosText: {
     fontFamily: theme.fonts.medium,
     fontSize: 13,
-    color: theme.colors.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    overflow: 'hidden',
+    color: '#FFFFFF',
   },
-  statsRow: {
+  row: {
     flexDirection: 'row',
     gap: 12,
   },
-  centered: {
-    paddingVertical: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   erroText: {
     fontFamily: theme.fonts.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: '#777',
   },
 });
