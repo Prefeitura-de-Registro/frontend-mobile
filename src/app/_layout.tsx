@@ -14,9 +14,6 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 
-// Guarda de rota simples: sem usuário logado -> manda pro /sign_in; logado
-// tentando abrir o /sign_in de novo -> manda pra /chamados. Baseado no
-// primeiro segmento da URL (nome da pasta em src/app).
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { usuario, carregando } = useAuth();
   const segments = useSegments();
@@ -29,13 +26,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const naTelaDeLogin = segments[0] === 'sign_in';
+  const isPublicRoute = segments[0] === 'selection_access' || segments[0] === 'sign_in';
 
-  if (!usuario && !naTelaDeLogin) {
-    return <Redirect href="/sign_in" />;
+  if (!usuario && !isPublicRoute) {
+    return <Redirect href={"/selection_access" as any} />;
   }
 
-  if (usuario && naTelaDeLogin) {
+  if (usuario && isPublicRoute) {
     return <Redirect href="/" />;
   }
 
