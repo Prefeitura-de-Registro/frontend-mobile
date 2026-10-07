@@ -69,8 +69,13 @@ export default function HomeOperadorScreen() {
               userName="Carlos"
               role="Secretaria de Obras"
               avatarUri="https://i.pravatar.cc/100"
+              
+              // 1. Adicionamos a ação de clique no perfil para abrir o menu:
+              onPressProfile={() => router.push('/menu')} 
+
+              // 2. Deixamos a notificação apenas com um aviso ou vazia por enquanto:
               onPressNotification={() => {
-                // TODO: navegar pra tela de notificação
+                console.log('Tela de notificações ainda não implementada');
               }}
             />
           </HeaderBackground>
