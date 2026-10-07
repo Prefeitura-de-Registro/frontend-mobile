@@ -1,6 +1,6 @@
 import { theme } from '@/constants';
 import { Check } from 'lucide-react-native';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface CheckboxItemProps {
   label: string;
@@ -10,10 +10,10 @@ interface CheckboxItemProps {
 
 export function CheckboxItem({ label, checked, onToggle }: CheckboxItemProps) {
   return (
-    <TouchableOpacity onPress={onToggle} activeOpacity={0.7} style={styles.row}>
-      <TouchableOpacity onPress={onToggle} style={[styles.box, checked && styles.boxChecked]}>
-        {checked && <Check size={14} color="white" />}
-      </TouchableOpacity>
+    <TouchableOpacity style={styles.row} onPress={onToggle} activeOpacity={0.7}>
+      <View style={[styles.box, checked && styles.boxChecked]}>
+        {checked && <Check size={12} color="white" strokeWidth={3} />}
+      </View>
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
@@ -26,11 +26,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   box: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#CCC',
+    borderColor: '#E0E0E0',
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -41,6 +42,6 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: theme.fonts.regular,
     fontSize: 14,
-    color: '#333',
+    color: '#555',
   },
 });
