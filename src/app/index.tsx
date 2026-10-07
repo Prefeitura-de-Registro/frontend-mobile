@@ -2,18 +2,16 @@ import { HeaderBackground } from '@/components/molecules/HeaderBackground';
 import { HeaderGreetingContent } from '@/components/molecules/HeaderGreetingContent';
 import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
-import { ChamadosList } from '@/components/organisms/ChamadosList';
-import { FooterLogo } from '@/components/organisms/FooterLogo';
+import { MapArea } from '@/components/organisms/MapArea';
 import { MapPreview } from '@/components/organisms/MapPreview';
 import SplashScreen from '@/components/organisms/SplashScreen';
-import { MapArea } from '@/components/organisms/MapArea';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Confira se esses valores batem com o tipo PrioridadeChamado do seu projeto.
@@ -90,7 +88,7 @@ export default function HomeOperadorScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
           <TouchableOpacity onPress={() => router.push('/chamados')}>
-            <Text style={styles.verTodos}>Ver todos</Text>
+            <Text style={styles.verTodosText}>Ver todos</Text>
           </TouchableOpacity>
         </View>
 
@@ -146,8 +144,11 @@ export default function HomeOperadorScreen() {
 
       <MapArea />
     </View>
+    </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   screen: {
