@@ -1,15 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
 import Svg, {
-    Circle,
-    Defs,
-    LinearGradient,
-    Path,
-    RadialGradient,
-    Rect,
-    Stop,
+  Circle,
+  Defs,
+  LinearGradient,
+  Path,
+  RadialGradient,
+  Rect,
+  Stop,
 } from 'react-native-svg';
-
 
 const ART_W = 430;
 const ART_H = 932;
@@ -25,8 +24,8 @@ interface SplashScreenProps {
 
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
   
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.92)).current;
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [scale] = useState(() => new Animated.Value(0.92));
 
   useEffect(() => {
     Animated.parallel([
