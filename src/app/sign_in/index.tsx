@@ -1,10 +1,21 @@
 import { InputMatricula } from '@/components/atoms/InputMatricula';
 import { InputPassword } from '@/components/atoms/InputPassword';
 import { PrimaryButton } from '@/components/atoms/PrimaryButton';
+import { FooterLogo } from '@/components/organisms/FooterLogo';
 import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
-import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 export default function LoginOperadorScreen() {
   const { signIn } = useAuth();
@@ -18,14 +29,10 @@ export default function LoginOperadorScreen() {
     setEnviando(true);
 
     try {
-      // TODO(backend/produto): ver o comentário em
-      // src/services/auth.service.ts — hoje isso aqui é mandado como
-      // "email" pro backend, porque não existe matrícula lá.
       await signIn(matricula, senha);
-      // Não precisa navegar manualmente: o AuthGate em _layout.tsx já
-      // redireciona pra /chamados assim que o "usuario" deixa de ser null.
     } catch (error: any) {
-      const mensagem = error?.response?.data?.message ?? 'Matrícula ou senha inválidos.';
+      const mensagem =
+        error?.response?.data?.message ?? 'Matrícula ou senha inválidos.';
       setErro(mensagem);
     } finally {
       setEnviando(false);
@@ -33,71 +40,122 @@ export default function LoginOperadorScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} bounces={false}>
-      {/* Topo maior exclusivo para a tela de Login com o degradê e o brasão */}
-      <ImageBackground
-        source={require('@/assets/images/degrade-registro.png')} // Caminho da imagem do degradê
-        style={styles.headerContainer}
-        resizeMode="cover"
-      >
-        <Image
-          source={require('@/assets/images/brasao-registro.png')}
-          style={styles.brasao}
-          resizeMode="contain"
-        />
-      </ImageBackground>
+    <View style={styles.mainContainer}>
+      
+      <Image
+        source={require('../../../assets/images/onda-topo.png')}
+        style={styles.ondaTopo}
+        resizeMode="cover" 
+      />
+      <Image
+        source={require('../../../assets/images/onda-rodape.png')}
+        style={styles.ondaInferior}
+        resizeMode="contain" 
+      />
 
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Bem-vindo de volta!</Text>
-
-        <View style={styles.inputGroup}>
-          <InputMatricula value={matricula} onChangeText={setMatricula} placeholder="Matrícula" />
-
-          <InputPassword value={senha} onChangeText={setSenha} placeholder="Senha" />
-
-          {erro && <Text style={styles.erroText}>{erro}</Text>}
-
-          <TouchableOpacity style={styles.forgotPasswordButton} activeOpacity={0.7}>
-            <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
-          </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.scrollContainer} bounces={false}>
+        
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../../../assets/images/logo-fala-registro.png')}
+            style={styles.logoFalaRegistro}
+            resizeMode="contain"
+          />
         </View>
 
-        <View style={styles.buttonWrapper}>
-          <PrimaryButton label="Entrar" onPress={handleLogin} loading={enviando} />
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>
+            <Text style={styles.titleBold}>Bem-vindo</Text> de volta!
+          </Text>
+
+          <View style={styles.inputGroup}>
+            <InputMatricula
+              value={matricula}
+              onChangeText={setMatricula}
+              placeholder="Matrícula"
+            />
+
+            <InputPassword
+              value={senha}
+              onChangeText={setSenha}
+              placeholder="Senha"
+            />
+
+            {erro && <Text style={styles.erroText}>{erro}</Text>}
+
+            <TouchableOpacity style={styles.forgotPasswordButton} activeOpacity={0.7}>
+              <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonWrapper}>
+            <PrimaryButton label="Entrar" onPress={handleLogin} loading={enviando} />
+          </View>
         </View>
-      </View>
-    </ScrollView>
+        
+        <View style={styles.footerContainer}>
+          <FooterLogo />
+        </View>
+
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB', 
+  },
+  
+  ondaTopo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 130,
+    height: 180, 
+    zIndex: 0,
+  },
+  ondaInferior: {
+    position: 'absolute',
+    bottom: -15,   
+    right: -37,    
+    width: 220,    
+    height: 220,
+    zIndex: 0,
+  },
+
+  scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#FFFFFF',
+    zIndex: 1, 
+    marginTop: 130
   },
-  headerContainer: {
+  logoContainer: {
     width: '100%',
-    height: 340,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 40,
+    marginTop: 80, 
+    marginBottom: 10,
   },
-  brasao: {
-    width: 140,
-    height: 140,
+  logoFalaRegistro: {
+    width: 300, 
+    height: 90,  
   },
   formContainer: {
     flex: 1,
     paddingHorizontal: 28,
-    paddingTop: 24,
+    paddingTop: 10,
     alignItems: 'center',
   },
   title: {
-    fontFamily: theme.fonts.bold,
-    fontSize: 24,
-    color: '#1F2937',
-    marginBottom: 32,
+    fontFamily: theme.fonts.regular,
+    fontSize: 24, 
+    color: '#333333',
+    marginBottom: 40,
     textAlign: 'center',
+  },
+  titleBold: {
+    fontFamily: theme.fonts.bold,
+    color: '#0072AE',
   },
   inputGroup: {
     width: '100%',
@@ -115,13 +173,18 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   forgotPasswordText: {
-    fontFamily: theme.fonts.medium,
+    fontFamily: theme.fonts.bold,
     fontSize: 13,
-    color: theme.colors.primary,
+    color: '#4A9BC4', 
     textDecorationLine: 'underline',
   },
   buttonWrapper: {
     width: '100%',
     marginTop: 24,
+    
+  },
+  footerContainer: {
+    paddingBottom: 10, 
+    alignItems: 'center',
   },
 });
