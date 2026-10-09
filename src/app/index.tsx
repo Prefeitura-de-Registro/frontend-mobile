@@ -69,9 +69,10 @@ export default function HomeOperadorScreen() {
               userName="Carlos"
               role="Secretaria de Obras"
               avatarUri="https://i.pravatar.cc/100"
-              onPressNotification={() => {
-                // TODO: navegar pra tela de notificação
-              }}
+              onPressProfile={() => router.push('/menu')} 
+              
+              // Alterado para incluir o /index e agradar ao TypeScript do Expo Router:
+              onPressNotification={() => router.push('/notificacoes')}
             />
           </HeaderBackground>
         </View>
