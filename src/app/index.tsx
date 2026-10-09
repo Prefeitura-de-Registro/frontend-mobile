@@ -4,6 +4,7 @@ import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { MapArea } from '@/components/organisms/MapArea';
 import { theme } from '@/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
@@ -12,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Confira se esses valores batem com o tipo PrioridadeChamado do seu projeto.
 const PRIORIDADE_URGENTE = 'urgente';
 const PRIORIDADE_MEDIA = 'media';
 const PRIORIDADE_NORMAL = 'normal';
@@ -21,6 +21,7 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
+  const { signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
@@ -70,8 +71,9 @@ export default function HomeOperadorScreen() {
               role="Secretaria de Obras"
               avatarUri="https://i.pravatar.cc/100"
               onPressNotification={() => 
-                router.push("/solicitacoes")
+                router.push("./solicitacoes")
               }
+              // onPressNotification={signOut}
             />
           </HeaderBackground>
         </View>
