@@ -82,7 +82,14 @@ export default function DetalhesChamadoScreen() {
                   console.log('Transferir acionado');
                 }}
                 onAtender={assumindo ? undefined : handleAtender}
-                onFinalizar={() => router.push(`/finalizar_atendimento?id=${chamado.id}`)}
+                onFinalizar={() => router.push({
+                  pathname: '/finalizar_atendimento',
+                  params: {
+                    id: chamado.id,
+                    protocolo: '#2026-00001', // Bypass temporário para focar no design
+                    tipoOcorrencia: chamado.tipo
+                  }
+                })}
               />
             )}
           </View>
