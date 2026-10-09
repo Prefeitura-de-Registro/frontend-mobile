@@ -1,6 +1,6 @@
 import { theme } from '@/constants';
 import { Bell } from 'lucide-react-native';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from '../atoms/Avatar';
 import { IconButton } from '../atoms/IconButton';
 
@@ -9,6 +9,7 @@ interface HeaderGreetingContentProps {
   role: string;
   avatarUri: string;
   onPressNotification: () => void;
+  onPressProfile?: () => void; // 1. Ensinamos o componente a aceitar esta nova propriedade
   /** Mostra o ponto vermelho no sino quando há notificações novas. */
   hasNotification?: boolean;
 }
@@ -18,17 +19,24 @@ export function HeaderGreetingContent({
   role,
   avatarUri,
   onPressNotification,
+  onPressProfile, // 2. Recebemos a propriedade aqui
   hasNotification = false,
 }: HeaderGreetingContentProps) {
   return (
     <View style={styles.row}>
-      <View style={styles.avatarRing}>
-        <Avatar uri={avatarUri} size={48} />
-      </View>
+      
+      {/* 3. Transformámos a View do Avatar num botão clicável */}
+      <TouchableOpacity activeOpacity={0.8} onPress={onPressProfile}>
+        <View style={styles.avatarRing}>
+          <Avatar uri={avatarUri} size={48} />
+        </View>
+      </TouchableOpacity>
+
       <View style={styles.textBlock}>
         <Text style={styles.greeting}>Olá, {userName}!</Text>
         <Text style={styles.role}>{role}</Text>
       </View>
+      
       <View>
         <IconButton onPress={onPressNotification} backgroundColor={theme.colors.primary}>
           <Bell size={20} color="white" />
