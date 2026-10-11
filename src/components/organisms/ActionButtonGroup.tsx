@@ -8,6 +8,10 @@ interface ActionButtonGroupProps {
   onTransferir?: () => void;
   onAtender?: () => void;
   onFinalizar?: () => void;
+  /** Texto do botão secundário (padrão: "Transferir para outro setor"). */
+  labelTransferir?: string;
+  /** Mostra o carregamento no botão "Atender chamado". */
+  atendendo?: boolean;
 }
 
 export function ActionButtonGroup({
@@ -15,18 +19,24 @@ export function ActionButtonGroup({
   onTransferir,
   onAtender,
   onFinalizar,
+  labelTransferir = 'Transferir para outro setor',
+  atendendo,
 }: ActionButtonGroupProps) {
   if (status === 'aberto') {
     return (
       <View style={{ gap: 12 }}>
-        <SecondaryButton label="Transferir para outro setor" onPress={onTransferir ?? (() => {})} />
-        <PrimaryButton label="Atender chamado" onPress={onAtender ?? (() => {})} />
+        <SecondaryButton label={labelTransferir} onPress={onTransferir ?? (() => { })} />
+        <PrimaryButton
+          label="Atender chamado"
+          onPress={onAtender ?? (() => { })}
+          loading={atendendo}
+        />
       </View>
     );
   }
 
   if (status === 'em_atendimento') {
-    return <PrimaryButton label="Finalizar atendimento" onPress={onFinalizar ?? (() => {})} />;
+    return <PrimaryButton label="Finalizar atendimento" onPress={onFinalizar ?? (() => { })} />;
   }
 
   // concluído: sem ações
