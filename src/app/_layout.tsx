@@ -1,3 +1,4 @@
+import AnimatedSplash from '@/components/organisms/SplashScreen';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -6,7 +7,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Redirect, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { theme } from '@/constants';
@@ -14,9 +15,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 
-// Guarda de rota simples: sem usuário logado -> manda pro /sign_in; logado
-// tentando abrir o /sign_in de novo -> manda pra /chamados. Baseado no
-// primeiro segmento da URL (nome da pasta em src/app).
+
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { usuario, carregando } = useAuth();
   const segments = useSegments();
@@ -49,6 +48,8 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  const [splashDone, setSplashDone] = useState(false);
+
   useEffect(() => {
     if (fontsLoaded || error) {
       SplashScreen.hideAsync();
@@ -57,6 +58,10 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !error) {
     return null;
+  }
+
+  if (!splashDone) {
+    return <AnimatedSplash onFinish={() => setSplashDone(true)} />;
   }
 
   return (
