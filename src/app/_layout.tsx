@@ -10,13 +10,11 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { theme } from '@/constants';
+import { AttachmentsProvider } from '@/contexts/AttachmentsContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 
-// Guarda de rota simples: sem usuário logado -> manda pro /sign_in; logado
-// tentando abrir o /sign_in de novo -> manda pra /chamados. Baseado no
-// primeiro segmento da URL (nome da pasta em src/app).
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { usuario, carregando } = useAuth();
   const segments = useSegments();
@@ -61,9 +59,11 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <AuthGate>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthGate>
+      <AttachmentsProvider>
+        <AuthGate>
+          <Stack screenOptions={{ headerShown: false }} />
+        </AuthGate>
+      </AttachmentsProvider>
     </AuthProvider>
   );
 }
