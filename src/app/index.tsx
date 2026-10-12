@@ -4,6 +4,7 @@ import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { MapArea } from '@/components/organisms/MapArea';
 import { theme } from '@/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
@@ -21,6 +22,7 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
+  const { signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
@@ -71,7 +73,10 @@ export default function HomeOperadorScreen() {
               avatarUri="https://i.pravatar.cc/100"
               onPressNotification={() => {
                 // TODO: navegar pra tela de notificação
+                router.push('./solicitacoes');
+
               }}
+              // onPressNotification={signOut}
             />
           </HeaderBackground>
         </View>
