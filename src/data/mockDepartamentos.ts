@@ -1,20 +1,32 @@
+
 import type { TipoOcorrencia } from '@/types/chamado';
 import type { TicketDepartamento } from '@/types/ticket';
 
-// TODO(integração): dados provisórios. Os ids abaixo NÃO existem no backend;
-// trocar pela listagem real de departamentos quando a rota estiver disponível.
+// Mock local alinhado aos departamentos existentes no banco.
+// Os IDs devem permanecer iguais aos registros reais do backend.
 export const mockDepartamentos: TicketDepartamento[] = [
-  { id: 1, nome: 'Departamento de Obras' },
-  { id: 2, nome: 'Departamento de Meio Ambiente' },
-  { id: 3, nome: 'Departamento de Iluminação Pública' },
-  { id: 4, nome: 'Departamento de Água e Esgoto' },
-  { id: 5, nome: 'Departamento de Educação' },
+  {
+    id: 1,
+    nome: 'Vias e Pavimentação',
+  },
+  {
+    id: 2,
+    nome: 'Poda e Arborização Urbana',
+  },
+  {
+    id: 3,
+    nome: 'Bueiros e Drenagem',
+  },
 ];
 
-// Departamento sugerido por tipo de ocorrência (mostrado com "(sugestão)").
-export const departamentoSugeridoPorTipo: Record<TipoOcorrencia, number> = {
+// Sugestão de departamento por tipo de ocorrência.
+// A associação de iluminação é provisória, pois não há
+// um departamento específico de iluminação no cadastro apresentado.
+export const departamentoSugeridoPorTipo: Partial<
+  Record<TipoOcorrencia, number>
+> = {
   buraco: 1,
   poda_arvore: 2,
-  iluminacao_publica: 3,
-  vazamento: 4,
+  iluminacao_publica: 1,
+  vazamento: 3,
 };

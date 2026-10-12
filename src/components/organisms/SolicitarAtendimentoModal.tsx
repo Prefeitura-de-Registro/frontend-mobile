@@ -1,11 +1,14 @@
 import { PrimaryButton } from '@/components/atoms/PrimaryButton';
 import { TextAreaInput } from '@/components/atoms/TextAreaInput';
 import { theme } from '@/constants';
+import { useAttachments } from '@/contexts/AttachmentsContext';
 import { mockDepartamentos } from '@/data/mockDepartamentos';
 import type { TicketDepartamento } from '@/types/ticket';
+import * as ImagePicker from 'expo-image-picker';
 import { Check, ChevronDown, ChevronUp, Paperclip, X } from 'lucide-react-native';
 import { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -26,9 +29,8 @@ interface SolicitarAtendimentoModalProps {
   onClose: () => void;
   onSubmit: (solicitacao: SolicitacaoAtendimento) => void;
   departamentos?: TicketDepartamento[];
-  /** Departamento que já aparece selecionado, marcado como "(sugestão)". */
   departamentoSugeridoId?: number;
-  onAnexarFotos?: () => void;
+  ticketId?: number;
 }
 
 export function SolicitarAtendimentoModal({
@@ -37,13 +39,15 @@ export function SolicitarAtendimentoModal({
   onSubmit,
   departamentos = mockDepartamentos,
   departamentoSugeridoId,
-  onAnexarFotos,
+  ticketId,
 }: SolicitarAtendimentoModalProps) {
   const [escolhidoId, setEscolhidoId] = useState<number | null>(null);
   const [listaAberta, setListaAberta] = useState(false);
   const [descricao, setDescricao] = useState('');
 
-  // Enquanto a pessoa não escolhe, vale a sugestão.
+  const { anexosLocais, adicionarAnexo } = useAttachments();
+  const imagensDesteTicket = ticketId ? (anexosLocais[ticketId] || []) : [];
+
   const departamentoId = escolhidoId ?? departamentoSugeridoId ?? null;
   const departamento = departamentos.find((item) => item.id === departamentoId) ?? null;
   const formularioValido = departamento !== null && descricao.trim().length > 0;
@@ -69,6 +73,23 @@ export function SolicitarAtendimentoModal({
   function escolher(id: number) {
     setEscolhidoId(id);
     setListaAberta(false);
+  }
+
+  async function handleEscolherFoto() {
+    const permissao = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissao.granted) {
+      alert('Precisamos de permissão para acessar suas fotos!');
+      return;
+    }
+
+    let resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+
+    if (!resultado.canceled && ticketId) {
+      adicionarAnexo(ticketId, resultado.assets[0].uri);
+    }
   }
 
   return (
@@ -158,10 +179,18 @@ export function SolicitarAtendimentoModal({
               onChangeText={setDescricao}
             />
 
-            <TouchableOpacity style={styles.attachRow} activeOpacity={0.7} onPress={onAnexarFotos}>
+            <TouchableOpacity style={styles.attachRow} activeOpacity={0.7} onPress={handleEscolherFoto}>
               <Paperclip size={18} color={theme.colors.primary} />
               <Text style={styles.attachText}>Anexar fotos</Text>
             </TouchableOpacity>
+
+            {imagensDesteTicket.length > 0 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.miniaturasContainer}>
+                {imagensDesteTicket.map((uri, index) => (
+                  <Image key={index} source={{ uri }} style={styles.miniatura} />
+                ))}
+              </ScrollView>
+            )}
 
             <PrimaryButton label="Solicitar" onPress={enviar} disabled={!formularioValido} />
           </ScrollView>
@@ -271,5 +300,15 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bold,
     fontSize: 14,
     color: theme.colors.primary,
+  },
+  miniaturasContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  miniatura: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 10,
   },
 });

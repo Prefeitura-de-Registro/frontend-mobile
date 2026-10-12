@@ -1,7 +1,12 @@
-import { PrimaryButton } from '@/components/atoms/PrimaryButton';
-import { theme } from '@/constants';
-import { Check } from 'lucide-react-native';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+
+import { Check, X } from 'lucide-react-native';
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface SolicitacaoSucessoModalProps {
   visible: boolean;
@@ -12,7 +17,6 @@ interface SolicitacaoSucessoModalProps {
 export function SolicitacaoSucessoModal({
   visible,
   onClose,
-  departamentoNome,
 }: SolicitacaoSucessoModalProps) {
   return (
     <Modal
@@ -24,19 +28,37 @@ export function SolicitacaoSucessoModal({
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar confirmação"
+            hitSlop={8}
+          >
+            <X size={22} color="#344054" strokeWidth={2} />
+          </TouchableOpacity>
+
           <View style={styles.iconCircle}>
-            <Check size={40} color="white" strokeWidth={3} />
+            <Check size={26} color="#FFFFFF" strokeWidth={3} />
           </View>
 
-          <Text style={styles.title} accessibilityRole="header">
-            Solicitação enviada!
+          <Text style={styles.message}>
+            Sua solicitação foi{'\n'}
+            encaminhada com sucesso!
           </Text>
-          <Text style={styles.message}>Sua solicitação de atendimento foi enviada para:</Text>
-          {departamentoNome ? <Text style={styles.departamento}>{departamentoNome}</Text> : null}
 
-          <View style={styles.buttonWrapper}>
-            <PrimaryButton label="Voltar ao chamado" onPress={onClose} />
-          </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={onClose}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Acompanhar solicitação"
+          >
+            <Text style={styles.buttonText}>
+              Acompanhar solicitação
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -49,47 +71,76 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 32,
   },
+
   container: {
     width: '100%',
-    alignItems: 'center',
+    maxWidth: 340,
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 24,
-    elevation: 5,
+    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingTop: 52,
+    paddingBottom: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: theme.colors.primary,
+
+  closeButton: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    zIndex: 1,
   },
-  title: {
-    fontFamily: theme.fonts.bold,
-    fontSize: 22,
-    color: theme.colors.primary,
-    textAlign: 'center',
-    marginBottom: 8,
+
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#198754',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
+
   message: {
-    fontFamily: theme.fonts.regular,
+    fontFamily: 'System',
     fontSize: 14,
-    color: '#666666',
+    fontWeight: '400',
+    color: '#111111',
     textAlign: 'center',
+    lineHeight: 23,
+    marginBottom: 24,
   },
-  departamento: {
-    fontFamily: theme.fonts.bold,
-    fontSize: 15,
-    color: '#333333',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  buttonWrapper: {
+
+  button: {
     width: '100%',
-    marginTop: 24,
+    minHeight: 36,
+    borderWidth: 1,
+    borderColor: '#0785C1',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+
+  buttonText: {
+    fontFamily: 'System',
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#0785C1',
+    textAlign: 'center',
   },
 });

@@ -13,7 +13,9 @@ import {
 } from '@/components/organisms/SolicitarAtendimentoModal';
 import { theme } from '@/constants';
 import { departamentoSugeridoPorTipo } from '@/data/mockDepartamentos';
-import { assumirTicket } from '@/services/tickets.service';
+// Importando os serviços oficiais do seu projeto
+import { useAttachments } from '@/contexts/AttachmentsContext';
+import { assumirTicket, buscarTicketPorId, criarSolicitacao } from '@/services/tickets.service';
 import type { Chamado, Coordenadas } from '@/types/chamado';
 import type { DetalhesChamadoParams } from '@/types/navigation';
 import {
@@ -24,6 +26,7 @@ import {
 } from '@/utils/detalhes-chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { Ionicons } from '@expo/vector-icons';
+import { isAxiosError } from 'axios';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -32,8 +35,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type EstadoCarga = 'carregando' | 'pronto' | 'erro' | 'nao_encontrado';
 
 // TODO(integração): o backend ainda não devolve a localização do chamado.
-// Enquanto isso o pin cai no centro de Registro-SP, só para a tela poder ser
-// validada contra o Figma. Remover quando `chamado.coordenadas` vier da API.
 const COORDENADAS_PLACEHOLDER: Coordenadas = { latitude: -24.4879, longitude: -47.8441 };
 
 const ATRASO_MODAL_SUCESSO_MS = 350;
@@ -43,7 +44,6 @@ export default function DetalhesChamadoScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<DetalhesChamadoParams>();
 
-  // Dados que chegam pela navegação (só o id é garantido) e id numérico da API.
   const preview = lerParametrosDetalhes(params);
   const idNumerico = idParaNumero(preview.id);
 
@@ -57,30 +57,15 @@ export default function DetalhesChamadoScreen() {
   const [departamentoSolicitado, setDepartamentoSolicitado] = useState<string>();
   const timerSucesso = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // NOVO: Pega os anexos guardados localmente
+  const { anexosLocais } = useAttachments();
+
+  // 1. CARREGAR DADOS COM O SERVICE OFICIAL (Corrigido: apenas buscarTicketPorId)
   useEffect(() => {
     if (idNumerico === null) return;
 
-    // 🚨 MOCK TEMPORÁRIO PARA VER O DESIGN DA TELA 🚨
-    // Como estamos a focar no UI, injetamos os dados idênticos ao Figma
-    // para contornar o erro de "Chamado não encontrado" da API.
-    setChamado({
-      id: String(idNumerico),
-      tipo: 'buraco',
-      titulo: 'Buraco',
-      descricao: 'Buraco grande, oferecendo riscos de quedas.',
-      status: 'aberto',
-      slaLabel: '8h',
-      criadoEm: '28/08/2026',
-      protocolo: '#2026-00001',
-      coordenadas: COORDENADAS_PLACEHOLDER,
-      fotos: ['anexo1.jpg', 'anexo2.jpg'] // Array com 2 itens para forçar o chip "2 anexo(s)"
-    } as any);
-
-    setEstado('pronto');
-    return;
-
-    /* 👇 CÓDIGO DA API ORIGINAL COMENTADO (Para ativar na sub-issue de integração)
     let cancelado = false;
+    setEstado('carregando');
 
     buscarTicketPorId(idNumerico)
       .then((ticket) => {
@@ -90,7 +75,8 @@ export default function DetalhesChamadoScreen() {
       })
       .catch((error) => {
         if (cancelado) return;
-        console.error('[detalhes_chamado] erro ao buscar ticket', error);
+        console.error('[detalhes_chamado] erro ao buscar ticket:', error);
+        // O isAxiosError ajuda a identificar o status real que a API devolveu
         const naoEncontrado = isAxiosError(error) && error.response?.status === 404;
         setEstado(naoEncontrado ? 'nao_encontrado' : 'erro');
       });
@@ -98,7 +84,6 @@ export default function DetalhesChamadoScreen() {
     return () => {
       cancelado = true;
     };
-    */
   }, [idNumerico, tentativa]);
 
   useEffect(() => {
@@ -107,8 +92,6 @@ export default function DetalhesChamadoScreen() {
     };
   }, []);
 
-  // Só vale o chamado carregado se for o mesmo da rota (a tela pode ser
-  // reaproveitada com outro id, ex.: toque em notificação).
   const chamadoAtual = chamado && chamado.id === String(idNumerico) ? chamado : null;
   const estadoAtual: EstadoCarga =
     idNumerico === null
@@ -118,18 +101,22 @@ export default function DetalhesChamadoScreen() {
         : estado;
 
   const tipo = chamadoAtual?.tipo ?? preview.tipo;
-  const titulo =
-    chamadoAtual?.titulo ?? (preview.tipo ? TIPO_OCORRENCIA_LABEL[preview.tipo] : undefined);
+  const titulo = chamadoAtual?.titulo ?? (preview.tipo ? TIPO_OCORRENCIA_LABEL[preview.tipo] : undefined);
   const status = chamadoAtual?.status ?? preview.status;
   const tempo = extrairTempo(chamadoAtual?.slaLabel ?? preview.sla);
   const protocolo = preview.protocolo ?? (chamadoAtual ? `#${chamadoAtual.id}` : undefined);
-  const totalAnexos = chamadoAtual?.fotos?.length ?? 0;
+
+  // NOVO: Soma os anexos do banco com os anexos da memória
+  const totalAnexosBanco = chamadoAtual?.fotos?.length ?? 0;
+  const totalAnexosMemoria = idNumerico ? (anexosLocais[idNumerico]?.length ?? 0) : 0;
+  const totalAnexos = totalAnexosBanco + totalAnexosMemoria;
 
   function tentarNovamente() {
     setEstado('carregando');
     setTentativa((t) => t + 1);
   }
 
+  // 2. ASSUMIR TICKET COM O SERVICE
   async function handleAtender() {
     if (idNumerico === null || assumindo) return;
 
@@ -138,8 +125,19 @@ export default function DetalhesChamadoScreen() {
     try {
       const ticketAtualizado = await assumirTicket(idNumerico);
       setChamado(mapTicketToChamado(ticketAtualizado));
+      Alert.alert('Sucesso', 'Chamado atribuído a você!');
     } catch (error) {
-      console.error('[detalhes_chamado] erro ao assumir ticket', error);
+      console.error('[detalhes_chamado] erro ao assumir ticket:', error);
+
+      if (isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          return Alert.alert('Aviso', 'Este chamado já possui um responsável.');
+        }
+        if (error.response?.status === 403) {
+          return Alert.alert('Acesso Negado', 'Você não pertence ao departamento deste chamado.');
+        }
+      }
+
       Alert.alert('Não foi possível atender o chamado', 'Tente novamente em instantes.');
     } finally {
       setAssumindo(false);
@@ -159,14 +157,33 @@ export default function DetalhesChamadoScreen() {
     });
   }
 
-  function handleSolicitar(solicitacao: SolicitacaoAtendimento) {
-    // TODO(integração): chamar `criarSolicitacao(id, ...)` aqui e só mostrar o
-    // sucesso quando a API responder. Por enquanto o envio é apenas visual.
-    setSolicitarVisivel(false);
-    setDepartamentoSolicitado(solicitacao.departamento.nome);
+  // 3. ENVIAR SOLICITAÇÃO COM O SERVICE
+  async function handleSolicitar(solicitacao: SolicitacaoAtendimento) {
+    if (idNumerico === null) return;
 
-    // No iOS não dá para abrir um Modal enquanto o outro ainda está fechando.
-    timerSucesso.current = setTimeout(() => setSucessoVisivel(true), ATRASO_MODAL_SUCESSO_MS);
+    try {
+      await criarSolicitacao(idNumerico, {
+        idDepartamentoSolicitado: solicitacao.departamento.id,
+        descricao: solicitacao.descricao
+      });
+
+      setSolicitarVisivel(false);
+      setDepartamentoSolicitado(solicitacao.departamento.nome);
+
+      // Forçamos o reload do chamado para atualizar tudo
+      setTentativa(t => t + 1);
+
+      // Timeout obrigatório para evitar bug visual no iOS
+      timerSucesso.current = setTimeout(() => setSucessoVisivel(true), ATRASO_MODAL_SUCESSO_MS);
+    } catch (error) {
+      console.error('[detalhes_chamado] erro na solicitação:', error);
+
+      if (isAxiosError(error) && error.response?.status === 400) {
+        return Alert.alert('Aviso', 'O chamado já pertence a este departamento.');
+      }
+
+      Alert.alert('Erro', 'Não foi possível enviar a solicitação.');
+    }
   }
 
   const temDadosParciais = Boolean(titulo || protocolo);
@@ -288,6 +305,7 @@ export default function DetalhesChamadoScreen() {
         onClose={() => setSolicitarVisivel(false)}
         onSubmit={handleSolicitar}
         departamentoSugeridoId={tipo ? departamentoSugeridoPorTipo[tipo] : undefined}
+        ticketId={idNumerico ?? undefined}
       />
 
       <SolicitacaoSucessoModal
