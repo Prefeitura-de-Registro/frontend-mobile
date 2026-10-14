@@ -5,6 +5,8 @@ import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
 import { MapArea, PONTOS_EXEMPLO } from '@/components/organisms/MapArea';
+import { MapPreview } from '@/components/organisms/MapPreview';
+import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext'; // ajuste o caminho
 import { listarTickets } from '@/services/tickets.service';
@@ -14,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PRIORIDADE_URGENTE = 'urgente';
@@ -24,7 +27,8 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const router = useRouter();
+  const router = useRouter();  
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
   const { signOut } = useAuth();
 
@@ -204,8 +208,11 @@ export default function HomeOperadorScreen() {
         onClose={() => setFiltroVisible(false)}
       />
     </View>
+    </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   screen: {
