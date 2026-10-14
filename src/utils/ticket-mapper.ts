@@ -28,7 +28,7 @@ const PRIORIDADE_MAP: Record<TicketResumo['prioridade'], PrioridadeChamado> = {
 // é um heurístico por palavra-chave só pra não quebrar o ícone/filtro por
 // tipo na tela. O ideal é o backend padronizar um slug em Categoria, ou o
 // front trocar TipoOcorrencia por string livre e buscar categorias via API.
-function inferirTipoOcorrencia(nomeCategoria: string): TipoOcorrencia {
+export function inferirTipoOcorrencia(nomeCategoria: string): TipoOcorrencia {
   const nome = nomeCategoria.toLowerCase();
 
   if (nome.includes('buraco')) return 'buraco';

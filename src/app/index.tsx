@@ -6,6 +6,7 @@ import { MapArea } from '@/components/organisms/MapArea';
 import { MapPreview } from '@/components/organisms/MapPreview';
 import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
@@ -22,7 +23,8 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const router = useRouter();
+  const { signOut } = useAuth();
+  const router = useRouter(); 
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
