@@ -61,6 +61,7 @@ export default function HomeOperadorScreen() {
 
   const contarStatus = (status: Chamado['status']) =>
     loading ? '–' : chamados.filter((c) => c.status === status).length;
+  
   const contarPrioridade = (prioridade: string) =>
     loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
@@ -74,23 +75,23 @@ export default function HomeOperadorScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.topPanel}>
-        <View style={{ paddingTop: insets.top }}>
-          <HeaderBackground height={90} backgroundColor="#FFFFFF">
-            <HeaderGreetingContent
-              userName="Carlos"
-              role="Secretaria de Obras"
-              avatarUri="https://i.pravatar.cc/100"
-              onPressNotification={() => {
-                // TODO: navegar pra tela de notificação
-                router.push('./solicitacoes');
+      <View style={[styles.topPanel, { paddingTop: insets.top }]}>
+        <HeaderBackground height={90} backgroundColor="#FFFFFF">
+          <HeaderGreetingContent
+            userName="Carlos"
+            role="Secretaria de Obras"
+            avatarUri="https://i.pravatar.cc/100"
+            onPressProfile={() => {
+              router.push('/menu')
+            }} 
+            onPressNotification={() => {
+              console.log('Tela de notificações ainda não implementada');
+            }}
+          />
+        </HeaderBackground>
+      </View>
 
-              }}
-              // onPressNotification={signOut}
-            />
-          </HeaderBackground>
-        </View>
-
+      <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
@@ -134,20 +135,18 @@ export default function HomeOperadorScreen() {
             />
           </View>
 
-        <MapPreview
-          onVerMapaCompleto={() => {
-            
-          }}
-        />
-      </View>
-
-      <MapArea />
+          <MapPreview
+            onVerMapaCompleto={() => {
+              console.log('Ação de ver mapa completo');
+            }}
+          />
+          
+          <MapArea />
+        </View>
+      </ScrollView>
     </View>
-    </ScrollView>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   screen: {
@@ -166,6 +165,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 30,
     gap: 14,
   },
   sectionHeader: {
