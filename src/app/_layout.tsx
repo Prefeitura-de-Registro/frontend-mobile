@@ -1,3 +1,4 @@
+import AnimatedSplash from '@/components/organisms/SplashScreen';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -6,7 +7,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Redirect, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { theme } from '@/constants';
@@ -47,6 +48,8 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  const [splashDone, setSplashDone] = useState(false);
+
   useEffect(() => {
     if (fontsLoaded || error) {
       SplashScreen.hideAsync();
@@ -55,6 +58,10 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !error) {
     return null;
+  }
+
+  if (!splashDone) {
+    return <AnimatedSplash onFinish={() => setSplashDone(true)} />;
   }
 
   return (
