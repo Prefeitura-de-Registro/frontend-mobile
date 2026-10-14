@@ -12,8 +12,11 @@ export function FilterChip({ label, color, selected, onToggle }: FilterChipProps
   return (
     <TouchableOpacity
       onPress={onToggle}
-      activeOpacity={0.7}
-      style={[styles.chip, { borderColor: color }, selected && { backgroundColor: color }]}
+      activeOpacity={0.8}
+      style={[
+        styles.chip,
+        { borderColor: color, backgroundColor: selected ? color : 'transparent' },
+      ]}
     >
       <Text style={[styles.label, { color: selected ? 'white' : color }]}>{label}</Text>
     </TouchableOpacity>
@@ -22,13 +25,15 @@ export function FilterChip({ label, color, selected, onToggle }: FilterChipProps
 
 const styles = StyleSheet.create({
   chip: {
-    borderWidth: 1,
-    borderRadius: 20,
+    minWidth: 88,
+    paddingHorizontal: 18,
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
   },
   label: {
-    fontFamily: theme.fonts.medium,
-    fontSize: 13,
+    fontFamily: theme.fonts.bold,
+    fontSize: 14,
   },
 });

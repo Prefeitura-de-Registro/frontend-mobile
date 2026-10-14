@@ -1,23 +1,34 @@
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { HeaderNavigationContent } from '@/components/molecules/HeaderNavigationContent';
 import { ChamadosList } from '@/components/organisms/ChamadosList';
-import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
+import { FiltroBottomSheet, STATUS_OPTIONS, TIPOS } from '@/components/organisms/FiltroBottomSheet';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
-import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { Chamado, StatusChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
-import { SlidersHorizontal } from 'lucide-react-native';
+import { SlidersHorizontal, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+interface Filtros {
+  status: StatusChamado[];
+  tipos: TipoOcorrencia[];
+}
+
+const FILTROS_VAZIOS: Filtros = { status: [], tipos: [] };
+
+function toggle<T>(lista: T[], item: T): T[] {
+  return lista.includes(item) ? lista.filter((i) => i !== item) : [...lista, item];
+}
 
 export default function ChamadosScreen() {
   const router = useRouter();
   const [activeTab] = useState<'Todos' | 'Abertos' | 'Em andamento' | 'Concluídos'>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroVisible, setFiltroVisible] = useState(false);
-  const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
-  const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VAZIOS); // aplicado
+  const [rascunho, setRascunho] = useState<Filtros>(FILTROS_VAZIOS); // marcado dentro do modal
 
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,12 +65,14 @@ export default function ChamadosScreen() {
     setTentativa((t) => t + 1);
   }
 
-  function togglePrioridade(p: PrioridadeChamado) {
-    setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
+  function abrirFiltro() {
+    setRascunho(filtros);
+    setFiltroVisible(true);
   }
 
-  function toggleTipo(t: TipoOcorrencia) {
-    setTipos((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+  function aplicarFiltros() {
+    setFiltros(rascunho);
+    setFiltroVisible(false);
   }
 
   const chamadosFiltrados = chamados.filter((c) => {
@@ -68,10 +81,29 @@ export default function ChamadosScreen() {
     if (activeTab === 'Abertos') matchTab = c.status === 'aberto';
     if (activeTab === 'Em andamento') matchTab = c.status === 'em_atendimento';
     if (activeTab === 'Concluídos') matchTab = c.status === 'concluido';
-    const matchPrioridade = prioridades.length === 0 || prioridades.includes(c.prioridade);
-    const matchTipo = tipos.length === 0 || tipos.includes(c.tipo);
-    return matchSearch && matchTab && matchPrioridade && matchTipo;
+    const matchStatus = filtros.status.length === 0 || filtros.status.includes(c.status);
+    const matchTipo = filtros.tipos.length === 0 || filtros.tipos.includes(c.tipo);
+    return matchSearch && matchTab && matchStatus && matchTipo;
   });
+
+  // chips ativos: tipos (escuros) primeiro, depois status coloridos
+  const chipsAtivos = [
+    ...filtros.tipos.map((value) => ({
+      key: `tipo-${value}`,
+      label: TIPOS.find((t) => t.value === value)?.label ?? value,
+      color: '#2B2B2B',
+      onRemove: () => setFiltros((f) => ({ ...f, tipos: f.tipos.filter((t) => t !== value) })),
+    })),
+    ...filtros.status.map((value) => {
+      const opt = STATUS_OPTIONS.find((s) => s.value === value);
+      return {
+        key: `status-${value}`,
+        label: opt?.activeLabel ?? value,
+        color: opt?.color ?? theme.colors.primary,
+        onRemove: () => setFiltros((f) => ({ ...f, status: f.status.filter((s) => s !== value) })),
+      };
+    }),
+  ];
 
   return (
     <View style={styles.container}>
@@ -82,17 +114,31 @@ export default function ChamadosScreen() {
           <View style={styles.searchWrapper}>
             <SearchInput value={searchQuery} onChangeText={setSearchQuery} placeholder="Pesquisar" />
           </View>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => setFiltroVisible(true)}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.filterButton} onPress={abrirFiltro} activeOpacity={0.8}>
             <SlidersHorizontal size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.content}>
+        {chipsAtivos.length > 0 && (
+          <View style={styles.activeFilters}>
+            {chipsAtivos.map((chip) => (
+              <TouchableOpacity
+                key={chip.key}
+                style={[styles.activeChip, { backgroundColor: chip.color }]}
+                onPress={chip.onRemove}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.activeChipText}>{chip.label}</Text>
+                <View style={styles.activeChipClose}>
+                  <X size={9} color={chip.color} strokeWidth={3} />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         <View style={styles.listContainer}>
           {loading ? (
             <View style={styles.centered}>
@@ -116,15 +162,12 @@ export default function ChamadosScreen() {
 
       <FiltroBottomSheet
         visible={filtroVisible}
-        prioridadesSelecionadas={prioridades}
-        tiposSelecionados={tipos}
-        onTogglePrioridade={togglePrioridade}
-        onToggleTipo={toggleTipo}
-        onLimpar={() => {
-          setPrioridades([]);
-          setTipos([]);
-        }}
-        onAplicar={() => setFiltroVisible(false)}
+        statusSelecionados={rascunho.status}
+        tiposSelecionados={rascunho.tipos}
+        onToggleStatus={(s) => setRascunho((r) => ({ ...r, status: toggle(r.status, s) }))}
+        onToggleTipo={(t) => setRascunho((r) => ({ ...r, tipos: toggle(r.tipos, t) }))}
+        onLimpar={() => setRascunho(FILTROS_VAZIOS)}
+        onAplicar={aplicarFiltros}
         onClose={() => setFiltroVisible(false)}
       />
     </View>
@@ -171,6 +214,35 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeFilters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    paddingBottom: 14,
+  },
+  activeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingLeft: 12,
+    paddingRight: 8,
+    paddingVertical: 5,
+    borderRadius: 16,
+  },
+  activeChipText: {
+    fontFamily: theme.fonts.bold,
+    fontSize: 12,
+    color: 'white',
+  },
+  activeChipClose: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
   },
