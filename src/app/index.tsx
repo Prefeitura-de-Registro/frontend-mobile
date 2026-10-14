@@ -81,9 +81,11 @@ export default function HomeOperadorScreen() {
               userName="Carlos"
               role="Secretaria de Obras"
               avatarUri="https://i.pravatar.cc/100"
-              onPressNotification={() => 
-                router.push("./solicitacoes")
-              }
+              onPressNotification={() => {
+                // TODO: navegar pra tela de notificação
+                router.push('./solicitacoes');
+
+              }}
               // onPressNotification={signOut}
             />
           </HeaderBackground>
