@@ -9,8 +9,7 @@ import {
   LogOut,
   User,
 } from 'lucide-react-native';
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MenuOperadorScreen() {
@@ -21,10 +20,12 @@ export default function MenuOperadorScreen() {
 
   const nomeExibicao = usuario?.nome || 'Operador';
 
+  // TODO(integração): trocar pelo departamento real do usuário quando o back devolver
   const secretariaExibicao = 'Secretaria de Obras';
 
   const iniciais = nomeExibicao
     .split(' ')
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
@@ -40,7 +41,6 @@ export default function MenuOperadorScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
-
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -51,21 +51,6 @@ export default function MenuOperadorScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 2. Bloco de Perfil */}
-      <View style={styles.profileContainer}>
-        <View style={styles.avatarWrapper}>
-          <Image
-            source={{ uri: userData.avatarUri }}
-            style={styles.avatarImage}
-          />
-        </View>
-        <Text style={styles.userName}>{userData.nome}</Text>
-        <Text style={styles.userRole}>{userData.secretaria}</Text>
-      </View>
-
-      {/* 3. Lista de Opções */}
-      <View style={styles.menuList}>
-        
       <View style={styles.profileContainer}>
         <View style={styles.avatarWrapper}>
           <Text style={styles.avatarInitials}>{iniciais}</Text>
@@ -75,7 +60,6 @@ export default function MenuOperadorScreen() {
       </View>
 
       <View style={styles.menuList}>
-
         <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
           <View style={styles.menuItemLeft}>
             <User color="#666666" size={20} />
@@ -84,7 +68,11 @@ export default function MenuOperadorScreen() {
           <ChevronRight color="#666666" size={20} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          activeOpacity={0.7}
+          onPress={() => router.push('./solicitacoes')}
+        >
           <View style={styles.menuItemLeft}>
             <ClipboardList color="#666666" size={20} />
             <Text style={styles.menuItemText}>Minhas solicitações</Text>
@@ -92,7 +80,11 @@ export default function MenuOperadorScreen() {
           <ChevronRight color="#666666" size={20} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          activeOpacity={0.7}
+          onPress={() => router.push('./notificacoes')}
+        >
           <View style={styles.menuItemLeft}>
             <Bell color="#666666" size={20} />
             <Text style={styles.menuItemText}>Notificações</Text>
@@ -110,7 +102,6 @@ export default function MenuOperadorScreen() {
             <Text style={styles.logoutText}>Sair</Text>
           </View>
         </TouchableOpacity>
-
       </View>
     </View>
   );
@@ -156,10 +147,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     overflow: 'hidden',
   },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
   avatarInitials: {
     fontFamily: theme.fonts.bold,
     fontSize: 36,
@@ -185,7 +172,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6', // Linha sutil ou cor de fundo se quiser isolar
     borderBottomColor: '#F3F4F6',
   },
   menuItemLeft: {

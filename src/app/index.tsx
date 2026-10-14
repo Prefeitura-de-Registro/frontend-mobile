@@ -22,7 +22,7 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const router = useRouter();  
+  const router = useRouter();
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
@@ -57,18 +57,17 @@ export default function HomeOperadorScreen() {
     };
   }, []);
 
+  // Enquanto carrega (ou se deu erro) mostra "–" em vez de um 0 enganoso
+  const semDados = loading || erro !== null;
+
   const contarStatus = (status: Chamado['status']) =>
-    loading ? '–' : chamados.filter((c) => c.status === status).length;
-  
+    semDados ? '–' : chamados.filter((c) => c.status === status).length;
+
   const contarPrioridade = (prioridade: string) =>
-    loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
+    semDados ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
   if (isSplashVisible) {
-    return (
-      <SplashScreen 
-        onFinish={() => setIsSplashVisible(false)} 
-      />
-    );
+    return <SplashScreen onFinish={() => setIsSplashVisible(false)} />;
   }
 
   return (
@@ -80,13 +79,12 @@ export default function HomeOperadorScreen() {
               userName="Carlos"
               role="Secretaria de Obras"
               avatarUri="https://i.pravatar.cc/100"
-              onPressProfile={() => router.push('/menu')} 
-              
-              // Alterado para incluir o /index e agradar ao TypeScript do Expo Router:
-              onPressNotification={() => router.push('/notificacoes')}
+              onPressProfile={() => router.push('./menu')}
+              onPressNotification={() => router.push('./notificacoes')}
             />
           </HeaderBackground>
         </View>
+      </View>
 
       <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
@@ -132,12 +130,14 @@ export default function HomeOperadorScreen() {
             />
           </View>
 
+          {erro && <Text style={styles.erroText}>{erro}</Text>}
+
           <MapPreview
             onVerMapaCompleto={() => {
               console.log('Ação de ver mapa completo');
             }}
           />
-          
+
           <MapArea />
         </View>
       </ScrollView>
