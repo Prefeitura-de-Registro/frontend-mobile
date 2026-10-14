@@ -80,15 +80,19 @@ export default function HomeOperadorScreen() {
     });
     return () => sub.remove();
   }, [mapaExpandido]);
+  // Enquanto carrega (ou se deu erro) mostra "–" em vez de um 0 enganoso
+  const semDados = loading || erro !== null;
 
   const contarStatus = (status: Chamado['status']) =>
-    loading ? '–' : chamados.filter((c) => c.status === status).length;
-  
+    semDados ? '–' : chamados.filter((c) => c.status === status).length;
+
   const contarPrioridade = (prioridade: string) =>
-    loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
+    semDados ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
+  if (isSplashVisible) {
+    return <SplashScreen onFinish={() => setIsSplashVisible(false)} />;
   }
 
   function toggleTipo(t: TipoOcorrencia) {
@@ -111,20 +115,18 @@ export default function HomeOperadorScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.topPanel, { paddingTop: insets.top }]}>
-        <HeaderBackground height={90} backgroundColor="#FFFFFF">
-          <HeaderGreetingContent
-            userName="Carlos"
-            role="Secretaria de Obras"
-            avatarUri="https://i.pravatar.cc/100"
-            onPressProfile={() => {
-              router.push('./menu')
-            }} 
-            onPressNotification={() => {
-              console.log('Tela de notificações ainda não implementada');
-            }}
-          />
-        </HeaderBackground>
+      <View style={styles.topPanel}>
+        <View style={{ paddingTop: insets.top }}>
+          <HeaderBackground height={90} backgroundColor="#FFFFFF">
+            <HeaderGreetingContent
+              userName="Carlos"
+              role="Secretaria de Obras"
+              avatarUri="https://i.pravatar.cc/100"
+              onPressProfile={() => router.push('./menu')}
+              onPressNotification={() => router.push('./notificacoes')}
+            />
+          </HeaderBackground>
+        </View>
       </View>
 
       <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
@@ -213,6 +215,17 @@ export default function HomeOperadorScreen() {
         onAplicar={() => setFiltroVisible(false)}
         onClose={() => setFiltroVisible(false)}
       />
+          {erro && <Text style={styles.erroText}>{erro}</Text>}
+
+          <MapPreview
+            onVerMapaCompleto={() => {
+              console.log('Ação de ver mapa completo');
+            }}
+          />
+
+          <MapArea />
+        </View>
+      </ScrollView>
     </View>
   );
 }
