@@ -3,6 +3,8 @@ import { HeaderGreetingContent } from '@/components/molecules/HeaderGreetingCont
 import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { MapArea } from '@/components/organisms/MapArea';
+import { MapPreview } from '@/components/organisms/MapPreview';
+import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { listarTickets } from '@/services/tickets.service';
@@ -10,7 +12,7 @@ import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PRIORIDADE_URGENTE = 'urgente';
@@ -22,7 +24,8 @@ const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
   const { signOut } = useAuth();
-  const router = useRouter();
+  const router = useRouter(); 
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +63,14 @@ export default function HomeOperadorScreen() {
     loading ? '–' : chamados.filter((c) => c.status === status).length;
   const contarPrioridade = (prioridade: string) =>
     loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
+
+  if (isSplashVisible) {
+    return (
+      <SplashScreen 
+        onFinish={() => setIsSplashVisible(false)} 
+      />
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -121,14 +132,20 @@ export default function HomeOperadorScreen() {
             />
           </View>
 
-          {erro ? <Text style={styles.erroText}>{erro}</Text> : null}
-        </View>
+        <MapPreview
+          onVerMapaCompleto={() => {
+            
+          }}
+        />
       </View>
 
       <MapArea />
     </View>
+    </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   screen: {

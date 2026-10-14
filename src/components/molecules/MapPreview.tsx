@@ -8,8 +8,6 @@ interface MapPreviewProps {
   onVerMapaCompleto: () => void;
 }
 
-// Placeholder estático — trocar por react-native-maps (ou uma imagem de Static Maps)
-// quando a lib de mapa estiver configurada no projeto (precisa de API key no Android).
 export function MapPreview({ title = 'Mapa de ocorrências', onVerMapaCompleto }: MapPreviewProps) {
   return (
     <View style={styles.container}>
@@ -28,28 +26,12 @@ export function MapPreview({ title = 'Mapa de ocorrências', onVerMapaCompleto }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-  },
-  title: {
-    fontFamily: theme.fonts.medium,
-    fontSize: 15,
-    color: '#333',
-  },
+  container: { gap: 12 },
+  title: { fontFamily: theme.fonts.medium, fontSize: 15, color: '#333' },
   placeholder: {
-    height: 160,
-    borderRadius: 12,
-    backgroundColor: '#EEF5FA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
+    height: 160, borderRadius: 12, backgroundColor: '#EEF5FA',
+    alignItems: 'center', justifyContent: 'center', gap: 6,
   },
-  placeholderText: {
-    fontFamily: theme.fonts.regular,
-    fontSize: 12,
-    color: '#777',
-  },
-  linkWrapper: {
-    alignItems: 'center',
-  },
+  placeholderText: { fontFamily: theme.fonts.regular, fontSize: 12, color: '#777' },
+  linkWrapper: { alignItems: 'center' },
 });
