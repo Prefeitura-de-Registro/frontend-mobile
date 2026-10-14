@@ -3,16 +3,17 @@ import { HeaderGreetingContent } from '@/components/molecules/HeaderGreetingCont
 import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { MapArea } from '@/components/organisms/MapArea';
+import { MapPreview } from '@/components/organisms/MapPreview';
+import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Confira se esses valores batem com o tipo PrioridadeChamado do seu projeto.
 const PRIORIDADE_URGENTE = 'urgente';
 const PRIORIDADE_MEDIA = 'media';
 const PRIORIDADE_NORMAL = 'normal';
@@ -21,7 +22,8 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const router = useRouter();
+  const router = useRouter();  
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +59,17 @@ export default function HomeOperadorScreen() {
 
   const contarStatus = (status: Chamado['status']) =>
     loading ? '–' : chamados.filter((c) => c.status === status).length;
+  
   const contarPrioridade = (prioridade: string) =>
     loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
+
+  if (isSplashVisible) {
+    return (
+      <SplashScreen 
+        onFinish={() => setIsSplashVisible(false)} 
+      />
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -77,6 +88,7 @@ export default function HomeOperadorScreen() {
           </HeaderBackground>
         </View>
 
+      <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
@@ -120,11 +132,15 @@ export default function HomeOperadorScreen() {
             />
           </View>
 
-          {erro ? <Text style={styles.erroText}>{erro}</Text> : null}
+          <MapPreview
+            onVerMapaCompleto={() => {
+              console.log('Ação de ver mapa completo');
+            }}
+          />
+          
+          <MapArea />
         </View>
-      </View>
-
-      <MapArea />
+      </ScrollView>
     </View>
   );
 }
@@ -146,6 +162,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 30,
     gap: 14,
   },
   sectionHeader: {
