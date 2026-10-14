@@ -8,7 +8,7 @@ import { MapArea, PONTOS_EXEMPLO } from '@/components/organisms/MapArea';
 import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
 import { listarTickets } from '@/services/tickets.service';
-import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
+import { Chamado, StatusChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
 import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
@@ -35,7 +35,7 @@ export default function HomeOperadorScreen() {
   const [mapaExpandido, setMapaExpandido] = useState(false);
   const [busca, setBusca] = useState('');
   const [filtroVisible, setFiltroVisible] = useState(false);
-  const [prioridades, setPrioridades] = useState<PrioridadeChamado[]>([]);
+  const [statusFiltro, setStatusFiltro] = useState<StatusChamado[]>([]);
   const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
 
   useEffect(() => {
@@ -85,8 +85,8 @@ export default function HomeOperadorScreen() {
   const contarPrioridade = (prioridade: string) =>
     semDados ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
-  function togglePrioridade(p: PrioridadeChamado) {
-    setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
+  function toggleStatus(s: StatusChamado) {
+    setStatusFiltro((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
   }
 
   function toggleTipo(t: TipoOcorrencia) {
@@ -101,11 +101,11 @@ export default function HomeOperadorScreen() {
         termo === '' ||
         p.titulo.toLowerCase().includes(termo) ||
         p.endereco.toLowerCase().includes(termo);
-      const matchPrioridade = prioridades.length === 0 || prioridades.includes(p.prioridade);
+      const matchStatus = statusFiltro.length === 0 || (p.status != null && statusFiltro.includes(p.status));
       const matchTipo = tipos.length === 0 || (p.tipo != null && tipos.includes(p.tipo));
-      return matchBusca && matchPrioridade && matchTipo;
+      return matchBusca && matchStatus && matchTipo;
     });
-  }, [busca, prioridades, tipos]);
+  }, [busca, statusFiltro, tipos]);
 
   // O early return fica depois de todos os hooks (regra dos hooks)
   if (isSplashVisible) {
@@ -202,12 +202,12 @@ export default function HomeOperadorScreen() {
 
       <FiltroBottomSheet
         visible={filtroVisible}
-        prioridadesSelecionadas={prioridades}
+        statusSelecionados={statusFiltro}
         tiposSelecionados={tipos}
-        onTogglePrioridade={togglePrioridade}
+        onToggleStatus={toggleStatus}
         onToggleTipo={toggleTipo}
         onLimpar={() => {
-          setPrioridades([]);
+          setStatusFiltro([]);
           setTipos([]);
         }}
         onAplicar={() => setFiltroVisible(false)}

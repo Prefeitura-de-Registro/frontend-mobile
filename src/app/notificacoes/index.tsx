@@ -67,7 +67,7 @@ export default function NotificacoesScreen() {
 
         <Text style={styles.headerTitle}>Notificações</Text>
 
-        <TouchableOpacity activeOpacity={0.7} style={styles.moreButton}>
+        <TouchableOpacity activeOpacity={0.7} style={styles.moreButton} onPress={() => router.push('./solicitacoes')}>
           <MoreHorizontal color="#0072AE" size={28} />
         </TouchableOpacity>
       </View>
