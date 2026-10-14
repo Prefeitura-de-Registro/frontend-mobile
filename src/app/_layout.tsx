@@ -30,9 +30,10 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   const naTelaDeLogin = segments[0] === 'sign_in';
 
-  if (!usuario && !naTelaDeLogin) {
-    return <Redirect href="/sign_in" />;
-  }
+  // 🚨 BYPASS TEMPORÁRIO PARA TESTAR O DESIGN 🚨
+  // if (!usuario && !naTelaDeLogin) {
+  //   return <Redirect href="/sign_in" />;
+  // }
 
   if (usuario && naTelaDeLogin) {
     return <Redirect href="/" />;
