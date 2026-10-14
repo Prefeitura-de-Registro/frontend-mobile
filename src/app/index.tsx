@@ -14,7 +14,6 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Confira se esses valores batem com o tipo PrioridadeChamado do seu projeto.
 const PRIORIDADE_URGENTE = 'urgente';
 const PRIORIDADE_MEDIA = 'media';
 const PRIORIDADE_NORMAL = 'normal';
@@ -60,6 +59,7 @@ export default function HomeOperadorScreen() {
 
   const contarStatus = (status: Chamado['status']) =>
     loading ? '–' : chamados.filter((c) => c.status === status).length;
+  
   const contarPrioridade = (prioridade: string) =>
     loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
@@ -73,43 +73,23 @@ export default function HomeOperadorScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.topPanel}>
-        <View style={{ paddingTop: insets.top }}>
-          <HeaderBackground height={90} backgroundColor="#FFFFFF">
-            <HeaderGreetingContent
-              userName="Carlos"
-              role="Secretaria de Obras"
-              avatarUri="https://i.pravatar.cc/100"
-              
-              // 1. Adicionamos a ação de clique no perfil para abrir o menu:
-              onPressProfile={() => router.push('/menu')} 
+      <View style={[styles.topPanel, { paddingTop: insets.top }]}>
+        <HeaderBackground height={90} backgroundColor="#FFFFFF">
+          <HeaderGreetingContent
+            userName="Carlos"
+            role="Secretaria de Obras"
+            avatarUri="https://i.pravatar.cc/100"
+            onPressProfile={() => {
+              router.push('/menu')
+            }} 
+            onPressNotification={() => {
+              console.log('Tela de notificações ainda não implementada');
+            }}
+          />
+        </HeaderBackground>
+      </View>
 
-              // 2. Deixamos a notificação apenas com um aviso ou vazia por enquanto:
-              onPressNotification={() => {
-                console.log('Tela de notificações ainda não implementada');
-              }}
-            />
-          </HeaderBackground>
-          <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
-            <HeaderBackground height={180}>
-              <HeaderGreetingContent
-                userName="Carlos"
-                role="Secretaria de Obras"
-                avatarUri="https://i.pravatar.cc/100"
-                onPressNotification={() => {
-
-                }}
-              />
-            </HeaderBackground>
-
-      <View style={styles.content}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
-          <TouchableOpacity onPress={() => router.push('/chamados')}>
-            <Text style={styles.verTodosText}>Ver todos</Text>
-          </TouchableOpacity>
-        </View>
-
+      <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
@@ -153,20 +133,18 @@ export default function HomeOperadorScreen() {
             />
           </View>
 
-        <MapPreview
-          onVerMapaCompleto={() => {
-            
-          }}
-        />
-      </View>
-
-      <MapArea />
+          <MapPreview
+            onVerMapaCompleto={() => {
+              console.log('Ação de ver mapa completo');
+            }}
+          />
+          
+          <MapArea />
+        </View>
+      </ScrollView>
     </View>
-    </ScrollView>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   screen: {
@@ -185,6 +163,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 30,
     gap: 14,
   },
   sectionHeader: {
