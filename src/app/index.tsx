@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Confira se esses valores batem com o tipo PrioridadeChamado do seu projeto.
 const PRIORIDADE_URGENTE = 'urgente';
 const PRIORIDADE_MEDIA = 'media';
 const PRIORIDADE_NORMAL = 'normal';
