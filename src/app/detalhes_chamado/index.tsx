@@ -65,7 +65,6 @@ export default function DetalhesChamadoScreen() {
     if (idNumerico === null) return;
 
     let cancelado = false;
-    setEstado('carregando');
 
     buscarTicketPorId(idNumerico)
       .then((ticket) => {

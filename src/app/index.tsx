@@ -27,7 +27,8 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const router = useRouter();  
+  const { signOut } = useAuth();
+  const router = useRouter(); 
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
   const { signOut } = useAuth();
@@ -82,6 +83,7 @@ export default function HomeOperadorScreen() {
 
   const contarStatus = (status: Chamado['status']) =>
     loading ? '–' : chamados.filter((c) => c.status === status).length;
+  
   const contarPrioridade = (prioridade: string) =>
     loading ? '–' : chamados.filter((c) => c.prioridade === prioridade).length;
 
@@ -109,30 +111,34 @@ export default function HomeOperadorScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.topPanel, mapaExpandido && styles.topPanelRecolhido]}>
-        <View style={{ paddingTop: insets.top }}>
-          <HeaderBackground height={90} backgroundColor="#FFFFFF">
-            <HeaderGreetingContent
-              userName="Carlos"
-              role="Secretaria de Obras"
-              avatarUri="https://i.pravatar.cc/100"
-              onPressNotification={signOut} // TODO: temporário, trocar por navegação para notificações
-            />
-          </HeaderBackground>
-        </View>
+      <View style={[styles.topPanel, { paddingTop: insets.top }]}>
+        <HeaderBackground height={90} backgroundColor="#FFFFFF">
+          <HeaderGreetingContent
+            userName="Carlos"
+            role="Secretaria de Obras"
+            avatarUri="https://i.pravatar.cc/100"
+            onPressProfile={() => {
+              router.push('./menu')
+            }} 
+            onPressNotification={() => {
+              console.log('Tela de notificações ainda não implementada');
+            }}
+          />
+        </HeaderBackground>
+      </View>
 
-        {!mapaExpandido && (
-          <View style={styles.content}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
-              <TouchableOpacity
-                style={styles.verTodosButton}
-                onPress={() => router.push('/chamados')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.verTodosText}>Ver todos</Text>
-              </TouchableOpacity>
-            </View>
+      <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
+            <TouchableOpacity
+              style={styles.verTodosButton}
+              onPress={() => router.push('/chamados')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.verTodosText}>Ver todos</Text>
+            </TouchableOpacity>
+          </View>
 
             <View style={styles.row}>
               <SummaryStatCard label="Abertos" value={contarStatus('aberto')} color={COR_ABERTO} />
@@ -208,11 +214,8 @@ export default function HomeOperadorScreen() {
         onClose={() => setFiltroVisible(false)}
       />
     </View>
-    </ScrollView>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   screen: {
@@ -234,6 +237,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 30,
     gap: 14,
   },
   sectionHeader: {
