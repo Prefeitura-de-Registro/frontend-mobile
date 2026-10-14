@@ -64,21 +64,18 @@ export default function DetalhesSolicitacaoScreen() {
   const { id, ticketId, tipo } = useLocalSearchParams<{ id: string; ticketId?: string; tipo?: string }>();
   const tipoAtual: Tipo = tipo === 'recebidas' ? 'recebidas' : 'enviadas';
 
-  const [loading, setLoading] = useState(true);
-  const [solicitacao, setSolicitacao] = useState<any>(null);
-  const [status, setStatus] = useState<Status>('nova');
-  const [mensagens, setMensagens] = useState<Mensagem[]>([]);
+  // Recebidas ainda usam mock: o valor ja entra nos estados iniciais (sem setState dentro do effect)
+  const mock = tipoAtual === 'recebidas' ? MOCKS.recebidas : null;
+
+  const [loading, setLoading] = useState(!mock);
+  const [solicitacao, setSolicitacao] = useState<any>(mock?.solicitacao ?? null);
+  const [status, setStatus] = useState<Status>(mock?.solicitacao.status ?? 'nova');
+  const [mensagens, setMensagens] = useState<Mensagem[]>(mock?.mensagens ?? []);
   const [aba, setAba] = useState<Aba>('detalhes');
   const [encerrarVisivel, setEncerrarVisivel] = useState(false);
 
   useEffect(() => {
-    if (tipoAtual === 'recebidas') {
-      setSolicitacao(MOCKS.recebidas.solicitacao);
-      setStatus(MOCKS.recebidas.solicitacao.status);
-      setMensagens(MOCKS.recebidas.mensagens);
-      setLoading(false);
-      return;
-    }
+    if (tipoAtual === 'recebidas') return;
 
     async function fetchDetalhes() {
       try {

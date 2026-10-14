@@ -1,6 +1,6 @@
 import { theme } from '@/constants';
 import { Check, X } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type ResultadoEncerramento = 'aprovada' | 'recusada';
@@ -25,15 +25,15 @@ export function EncerrarSolicitacaoModal({ visible, titulo, protocolo, onClose, 
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  // Ao fechar, volta tudo para o estado inicial
-  useEffect(() => {
-    if (!visible) {
-      setEtapa('escolha');
-      setResultado(null);
-      setEnviando(false);
-      setErro(null);
-    }
-  }, [visible]);
+  // Ao fechar, volta tudo para o estado inicial (feito aqui e nao em um useEffect,
+  // porque setState direto dentro de effect quebra a regra react-hooks/set-state-in-effect)
+  function fechar() {
+    setEtapa('escolha');
+    setResultado(null);
+    setEnviando(false);
+    setErro(null);
+    onClose();
+  }
 
   async function encerrar() {
     if (!resultado || enviando) return;
@@ -51,12 +51,12 @@ export function EncerrarSolicitacaoModal({ visible, titulo, protocolo, onClose, 
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={fechar}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={onClose}
+            onPress={fechar}
             activeOpacity={0.7}
             accessibilityLabel="Fechar"
           >

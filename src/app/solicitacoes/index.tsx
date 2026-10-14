@@ -49,7 +49,8 @@ export default function SolicitacoesScreen() {
   const [aba, setAba] = useState<Aba>('enviadas');
   const [searchQuery, setSearchQuery] = useState('');
   const [enviadas, setEnviadas] = useState<Solicitacao[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Comeca true porque a aba inicial (enviadas) busca os dados assim que a tela abre
+  const [loading, setLoading] = useState(true);
 
   // Estados do Filtro
   const [filtroVisible, setFiltroVisible] = useState(false);
@@ -65,44 +66,51 @@ export default function SolicitacoesScreen() {
   }
 
   useEffect(() => {
-    if (aba === 'enviadas') {
-      fetchEnviadas();
-    }
-  }, [aba]);
+    if (aba !== 'enviadas') return;
 
-  async function fetchEnviadas() {
-    setLoading(true);
-    try {
-      const ticketsData = await listarTickets({ limit: 50 });
-      
-      if (!ticketsData.data || ticketsData.data.length === 0) {
-        setEnviadas([]);
-        return;
+    let cancelado = false;
+
+    // A busca fica dentro do effect: os setState rodam depois dos await,
+    // entao nao disparam a regra react-hooks/set-state-in-effect
+    async function carregarEnviadas() {
+      try {
+        const ticketsData = await listarTickets({ limit: 50 });
+
+        if (!ticketsData.data || ticketsData.data.length === 0) {
+          if (!cancelado) setEnviadas([]);
+          return;
+        }
+
+        const promessas = ticketsData.data.map(async (ticket) => {
+          const solicitacoes = await listarSolicitacoes(ticket.id);
+
+          return solicitacoes.map((s: any) => ({
+            id: String(s.id),
+            ticketId: String(ticket.id),
+            titulo: ticket.categoria?.nome || `Ticket #${ticket.id}`,
+            protocolo: `TKT-${ticket.id}`,
+            data: new Date(s.createdAt).toLocaleDateString('pt-BR'),
+            status: s.status,
+            prioridade: ticket.prioridade,
+            tipo: ticket.categoria?.nome ? inferirTipoOcorrencia(ticket.categoria.nome) : 'buraco',
+          }));
+        });
+
+        const arraysDeSolicitacoes = await Promise.all(promessas);
+        if (!cancelado) setEnviadas(arraysDeSolicitacoes.flat());
+      } catch (error) {
+        console.error('Erro ao buscar solicitações enviadas:', error);
+      } finally {
+        if (!cancelado) setLoading(false);
       }
-
-      const promessas = ticketsData.data.map(async (ticket) => {
-        const solicitacoes = await listarSolicitacoes(ticket.id);
-        
-        return solicitacoes.map((s: any) => ({
-          id: String(s.id),
-          ticketId: String(ticket.id),
-          titulo: ticket.categoria?.nome || `Ticket #${ticket.id}`, 
-          protocolo: `TKT-${ticket.id}`,
-          data: new Date(s.createdAt).toLocaleDateString('pt-BR'),
-          status: s.status,
-          prioridade: ticket.prioridade,
-          tipo: ticket.categoria?.nome ? inferirTipoOcorrencia(ticket.categoria.nome) : 'buraco',
-        }));
-      });
-
-      const arraysDeSolicitacoes = await Promise.all(promessas);
-      setEnviadas(arraysDeSolicitacoes.flat());
-    } catch (error) {
-      console.error("Erro ao buscar solicitações enviadas:", error);
-    } finally {
-      setLoading(false);
     }
-  }
+
+    carregarEnviadas();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [aba]);
 
   const listaBase = aba === 'enviadas' ? enviadas : RECEBIDAS_MOCK;
   const chamadosFiltrados = listaBase.filter((c) => {
@@ -152,7 +160,7 @@ export default function SolicitacoesScreen() {
       </View>
 
       <View style={styles.content}>
-        {loading ? (
+        {aba === 'enviadas' && loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
         ) : (
           <FlatList
@@ -173,7 +181,7 @@ export default function SolicitacoesScreen() {
                   activeOpacity={0.8}
                   onPress={() =>
                     router.push({ 
-                      pathname: '/solicitacoes/[id]', 
+                      pathname: './solicitacoes/[id]', 
                       params: { id: item.id, ticketId: item.ticketId, tipo: aba } 
                     })
                   }

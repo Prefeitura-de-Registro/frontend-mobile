@@ -82,7 +82,7 @@ export default function HomeOperadorScreen() {
             role="Secretaria de Obras"
             avatarUri="https://i.pravatar.cc/100"
             onPressProfile={() => {
-              router.push('/menu')
+              router.push('./menu')
             }} 
             onPressNotification={() => {
               console.log('Tela de notificações ainda não implementada');
