@@ -5,10 +5,8 @@ import { PriorityStatCard } from '@/components/molecules/PriorityStatCard';
 import { SummaryStatCard } from '@/components/molecules/SummaryStatCard';
 import { FiltroBottomSheet } from '@/components/organisms/FiltroBottomSheet';
 import { MapArea, PONTOS_EXEMPLO } from '@/components/organisms/MapArea';
-import { MapPreview } from '@/components/organisms/MapPreview';
 import SplashScreen from '@/components/organisms/SplashScreen';
 import { theme } from '@/constants';
-import { useAuth } from '@/contexts/AuthContext'; // ajuste o caminho
 import { listarTickets } from '@/services/tickets.service';
 import { Chamado, PrioridadeChamado, TipoOcorrencia } from '@/types/chamado';
 import { mapTicketToChamado } from '@/utils/ticket-mapper';
@@ -16,7 +14,6 @@ import { useRouter } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PRIORIDADE_URGENTE = 'urgente';
@@ -27,11 +24,9 @@ const COR_ABERTO = '#E02424';
 const COR_CONCLUIDO = '#22C79A';
 
 export default function HomeOperadorScreen() {
-  const { signOut } = useAuth();
-  const router = useRouter(); 
+  const router = useRouter();
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const insets = useSafeAreaInsets();
-  const { signOut } = useAuth();
 
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +75,7 @@ export default function HomeOperadorScreen() {
     });
     return () => sub.remove();
   }, [mapaExpandido]);
+
   // Enquanto carrega (ou se deu erro) mostra "–" em vez de um 0 enganoso
   const semDados = loading || erro !== null;
 
@@ -91,8 +87,6 @@ export default function HomeOperadorScreen() {
 
   function togglePrioridade(p: PrioridadeChamado) {
     setPrioridades((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
-  if (isSplashVisible) {
-    return <SplashScreen onFinish={() => setIsSplashVisible(false)} />;
   }
 
   function toggleTipo(t: TipoOcorrencia) {
@@ -113,9 +107,14 @@ export default function HomeOperadorScreen() {
     });
   }, [busca, prioridades, tipos]);
 
+  // O early return fica depois de todos os hooks (regra dos hooks)
+  if (isSplashVisible) {
+    return <SplashScreen onFinish={() => setIsSplashVisible(false)} />;
+  }
+
   return (
     <View style={styles.screen}>
-      <View style={styles.topPanel}>
+      <View style={[styles.topPanel, mapaExpandido && styles.topPanelRecolhido]}>
         <View style={{ paddingTop: insets.top }}>
           <HeaderBackground height={90} backgroundColor="#FFFFFF">
             <HeaderGreetingContent
@@ -127,20 +126,19 @@ export default function HomeOperadorScreen() {
             />
           </HeaderBackground>
         </View>
-      </View>
 
-      <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
-            <TouchableOpacity
-              style={styles.verTodosButton}
-              onPress={() => router.push('/chamados')}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.verTodosText}>Ver todos</Text>
-            </TouchableOpacity>
-          </View>
+        {!mapaExpandido && (
+          <View style={styles.content}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Chamados atribuídos a você</Text>
+              <TouchableOpacity
+                style={styles.verTodosButton}
+                onPress={() => router.push('/chamados')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.verTodosText}>Ver todos</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.row}>
               <SummaryStatCard label="Abertos" value={contarStatus('aberto')} color={COR_ABERTO} />
@@ -215,17 +213,6 @@ export default function HomeOperadorScreen() {
         onAplicar={() => setFiltroVisible(false)}
         onClose={() => setFiltroVisible(false)}
       />
-          {erro && <Text style={styles.erroText}>{erro}</Text>}
-
-          <MapPreview
-            onVerMapaCompleto={() => {
-              console.log('Ação de ver mapa completo');
-            }}
-          />
-
-          <MapArea />
-        </View>
-      </ScrollView>
     </View>
   );
 }
