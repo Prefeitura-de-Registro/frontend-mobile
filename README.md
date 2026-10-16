@@ -1,56 +1,19 @@
-# Welcome to your Expo app 👋
+# Release 14/10 - Squad Mobile Nativo (Fala Registro!)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este documento contém as entregas referentes à release do dia **14 de outubro**, desenvolvidas para o aplicativo mobile nativo do sistema **Fala Registro!** no contexto do curso de Desenvolvimento de Software Multiplataforma da FATEC Registro.
 
-## Get started
+## Resumo da Entrega
 
-1. Install dependencies
+Nesta release, concentramos nossos esforços na consolidação do aplicativo mobile. O foco principal foi a construção completa de toda a interface do usuário (UI) e a realização das integrações necessárias para conectar o aplicativo aos fluxos de dados, garantindo um aplicativo funcional, navegável e pronto para o uso no dispositivo.
 
-   ```bash
-   npm install
-   ```
+As principais entregas foram divididas nas seguintes frentes:
 
-2. Start the app
+### 1. Desenvolvimento Completo das Telas (UI/UX)
 
-   ```bash
-   npx expo start
-   ```
+- **Construção de Interface Nativa:** Implementação de 100% das telas previstas para o aplicativo (autenticação, listagem de ocorrências, abertura de novos chamados, detalhes e perfil do usuário), respeitando o design system e garantindo alta fidelidade visual.
+- **Navegação e Usabilidade:** Estruturação dos fluxos de navegação (pilhas e abas) específicos para o ambiente mobile, proporcionando transições fluidas e uma experiência de usuário (UX) otimizada para o toque e para as diretrizes de dispositivos móveis.
 
-In the output, you'll find options to open the app in a
+### 2. Integração e Fluxo de Dados
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Conexão com a Camada de Serviços:** Integração das telas com as regras de negócio e serviços da aplicação. Os formulários e componentes visuais foram conectados aos gerenciadores de estado para lidar com o fluxo de informações do usuário.
+- **Funcionalidade Fim a Fim:** Estruturação técnica para a captura de dados nativos (como inputs de texto, seleção de categorias e anexos) e envio dessas informações, estabelecendo a comunicação necessária para que o aplicativo mobile deixe de ser apenas visual e passe a operar de forma integrada com a arquitetura do sistema.
